@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
 		a.setStyleSheet(styleSheet);
 		file.close();
 	}
-	a.setWindowIcon(QIcon(":/images/app_icon.png"));
+	a.setWindowIcon(QIcon(":/images/app.ico"));
 
 	MainWindow w;
 	LoginDialog loginDialog;
