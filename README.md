@@ -11,9 +11,11 @@
 ## RegisterDialog
 注册对话框从上到下：
 1. label 显示欢迎注册用户
-2. 输入用户名
-3. 输入邮箱
-4. 输入密码
-5. 再次确认密码
-6. 接收验证码
+2. 伙伴(label+lineEdit):输入用户名
+3. 伙伴(label+lineEdit):输入邮箱
+4. 伙伴(label+lineEdit):输入密码
+5. 伙伴(label+lineEdit):再次确认密码
+6. 伙伴(label+lineEdit):接收验证码
 7. 确认和取消
+
+命名规范：类名_功能名，比如登录按钮button_login

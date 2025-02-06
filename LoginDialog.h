@@ -18,4 +18,4 @@ private:
 	Ui::LoginDialog *ui;
 };
 
-#endif	// LOGINDIALOG_H
+#endif // LOGINDIALOG_H

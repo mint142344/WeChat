@@ -12,15 +12,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
-set(PROJECT_SOURCES
-        main.cpp
-        mainwindow.cpp
-        mainwindow.h
-        mainwindow.ui
-)
-
-add_executable(WeChat ${PROJECT_SOURCES}
+add_executable(WeChat
     rc.qrc
+    main.cpp
+    mainwindow.cpp mainwindow.h mainwindow.ui
     LoginDialog.h LoginDialog.cpp LoginDialog.ui
-    RegisterDialog.h RegisterDialog.cpp RegisterDialog.ui)
+    RegisterDialog.h RegisterDialog.cpp RegisterDialog.ui
+)
 target_link_libraries(WeChat PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)

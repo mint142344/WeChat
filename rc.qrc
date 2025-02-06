@@ -1,1 +1,7 @@
-<RCC/>
+<RCC>
+    <qresource prefix="/">
+        <file>style/styleSheet.qss</file>
+        <file>images/default_avatar.png</file>
+        <file>images/app_icon.png</file>
+    </qresource>
+</RCC>

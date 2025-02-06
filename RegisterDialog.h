@@ -14,8 +14,14 @@ public:
 	explicit RegisterDialog(QWidget *parent = nullptr);
 	~RegisterDialog();
 
+private slots:
+	void on_lineEdit_email_editingFinished();
+
+private:
+	void setErrorHint(bool isError, const QString &hint);
+
 private:
 	Ui::RegisterDialog *ui;
 };
 
-#endif	// REGISTERDIALOG_H
+#endif // REGISTERDIALOG_H
