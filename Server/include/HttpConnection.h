@@ -1,0 +1,28 @@
+#pragma once
+#include "Common.h"
+#include <memory>
+
+class HttpConnection : public std::enable_shared_from_this<HttpConnection> {
+public:
+	HttpConnection(net::io_context& ioc, tcp::socket socket);
+	~HttpConnection() {
+		// fmt::println("HttpConnection destructed");
+	}
+	void start();
+
+private:
+	// [ASYNC]
+	void startTimeoutCheck(int seconds = 30);
+	void on_read(size_t length);
+	void on_write(size_t length);
+
+private:
+	net::io_context& m_ioc;
+	tcp::socket m_socket;
+
+	beast::flat_buffer m_buf;
+	http::request<http::string_body> m_req;
+	http::response<http::dynamic_body> m_res;
+
+	net::steady_timer m_timer;
+};
