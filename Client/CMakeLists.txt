@@ -11,8 +11,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_AUTOUIC_SEARCH_PATHS "${CMAKE_SOURCE_DIR}/ui")
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Widgets Network)
 
 file(GLOB_RECURSE SOURCES "${CMAKE_SOURCE_DIR}/src/*.cpp")
 file(GLOB_RECURSE HEADERS "${CMAKE_SOURCE_DIR}/include/*.h")
@@ -20,5 +19,8 @@ file(GLOB_RECURSE UI_FILES "${CMAKE_SOURCE_DIR}/ui/*.ui")
 
 add_executable(WeChat rc.qrc ${SOURCES} ${HEADERS} ${UI_SOURCES})
 
-target_link_libraries(WeChat PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(WeChat PRIVATE
+    Qt6::Widgets
+    Qt6::Network
+)
 target_include_directories(WeChat PRIVATE ${CMAKE_SOURCE_DIR}/include)

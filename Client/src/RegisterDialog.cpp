@@ -1,6 +1,7 @@
 #include "RegisterDialog.h"
-#include <qobject.h>
+#include <qjsonobject.h>
 #include "ui_RegisterDialog.h"
+#include "HttpManager.h"
 
 #include <QStyle>
 #include <QRegularExpression>
@@ -11,6 +12,9 @@ RegisterDialog::RegisterDialog(QWidget *parent) : QDialog(parent), ui(new Ui::Re
 
 	// qss 属性设置
 	ui->label_errorhint->setProperty("error", false);
+
+	connect(HttpManager::getInstance(), &HttpManager::sig_module_register_finished, this,
+			&RegisterDialog::on_request_finished);
 }
 
 RegisterDialog::~RegisterDialog() { delete ui; }
@@ -32,4 +36,21 @@ void RegisterDialog::on_lineEdit_email_editingFinished() {
 		setErrorHint(true, "邮箱格式不正确");
 	else
 		setErrorHint(false, "");
+}
+
+void RegisterDialog::on_request_finished(RequestType request_type, const QJsonObject &json) {
+	// 处理不同的请求
+	m_request_map[request_type](json);
+}
+
+void RegisterDialog::registerCallback(const QJsonObject &json) {
+	m_request_map.insert(RequestType::REGISTER, [this](const QJsonObject &json) {
+		// 注册成功
+	});
+
+	m_request_map.insert(RequestType::GET_VERIFICATION_CODE, [this](const QJsonObject &json) {
+		// 获取验证码成功
+		bool ok = json["ok"].toBool();
+		setErrorHint(false, "验证码已发送到邮箱");
+	});
 }
