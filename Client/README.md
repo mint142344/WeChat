@@ -9,6 +9,7 @@
 5. 注册账号和忘记密码
 
 ## RegisterDialog类
+- UI
 注册对话框从上到下：
 1. label 显示欢迎注册用户
 2. 伙伴(label+lineEdit):输入用户名
@@ -17,9 +18,14 @@
 5. 伙伴(label+lineEdit):再次确认密码
 6. 伙伴(label+lineEdit):接收验证码
 7. 确认和取消
+- 网络
+
+注册回调 -> `HttpManager` -> 分发Signal -> slot拿到response -> 回调处理响应
+1. 构造函数注册 http 请求的各种处理回调
+2. 连接`HttpManager`单例类的信号，槽函数分别对不同请求处理
 
 ui对象命名规范：类名_功能名，比如登录按钮button_login
 
 ## HttpManager类
-1. 单例类，发送接受http请求
-2. 使用信号通知其他界面 消息处理情况
+1. 单例类，发送http get/post请求
+2. `HttpManager`类将信号分发到各模块(登录,注册, ...), 不同模块细分处理

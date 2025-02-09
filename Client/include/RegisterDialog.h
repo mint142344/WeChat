@@ -1,7 +1,6 @@
 #ifndef REGISTERDIALOG_H
 #define REGISTERDIALOG_H
 
-#include <qjsonobject.h>
 #include "Common.h"
 
 #include <QMap>
@@ -21,10 +20,13 @@ public:
 
 private slots:
 	void on_lineEdit_email_editingFinished();
-	void on_request_finished(RequestType request_type, const QJsonObject &json);
+	void http_request_finished(RequestType request_type, const QJsonObject &json);
+
+	// button: 发送验证码
+	void on_button_sendCode_clicked();
 
 private:
-	void registerCallback(const QJsonObject &json);
+	void registerAllCallback();
 	void setErrorHint(bool isError, const QString &hint);
 
 private:

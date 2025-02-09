@@ -1,11 +1,8 @@
 #pragma once
 
-#include <qjsonobject.h>
-#include <qtmetamacros.h>
 #include "Singleton.hpp"
 #include "Common.h"
 
-#include <QObject>
 #include <QtNetwork/QNetworkAccessManager>
 
 class HttpManager : public QObject, public Singleton<HttpManager> {
@@ -18,7 +15,7 @@ public:
 	~HttpManager() override = default;
 
 	// 发送GET请求
-	void post(const QUrl& url, const QJsonObject& json, ModuleType module_type,
+	void post(const QString& route, const QJsonObject& json, ModuleType module_type,
 			  RequestType request_type);
 
 private:
@@ -32,6 +29,7 @@ signals:
 
 private:
 	QNetworkAccessManager* m_net_manager;
+	QString m_url_prefix;
 
 private:
 	explicit HttpManager(QObject* parent = nullptr);
