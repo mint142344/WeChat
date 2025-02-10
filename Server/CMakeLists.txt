@@ -7,14 +7,19 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Boost CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
+find_package(Protobuf CONFIG REQUIRED)
+find_package(gRPC CONFIG REQUIRED)
 find_package(fmt REQUIRED)
 
 file(GLOB SOURCES src/*.cpp)
+file(GLOB PROTO_GEN_SOURCES gen/*.cc)
 
-add_executable(GateServer ${SOURCES})
+add_executable(GateServer ${SOURCES} ${PROTO_GEN_SOURCES})
 target_link_libraries(GateServer PRIVATE
     Boost::boost
     nlohmann_json::nlohmann_json
     fmt::fmt
+    gRPC::grpc++
+    protobuf
 )
-target_include_directories(GateServer PRIVATE include)
+target_include_directories(GateServer PRIVATE include gen)

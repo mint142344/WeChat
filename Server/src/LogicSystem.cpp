@@ -1,6 +1,9 @@
 #include "LogicSystem.h"
+#include "EmailVerifyClient.h"
+
 #include <fmt/base.h>
 #include <nlohmann/json.hpp>
+
 #include <string>
 
 using json = nlohmann::json;
@@ -42,10 +45,15 @@ LogicSystem::LogicSystem() {
 					return;
 				}
 
-				res.result(http::status::ok);
-				res.set(http::field::content_type, "application/json");
+				// RPC call
+				json data = EmailVerifyClient::getInstance()->getEmailVerifyCode(req_json["email"]);
+				if (data["status"] == "ok") {
+					res.result(http::status::ok);
+				} else {
+					res.result(http::status::internal_server_error);
+				}
 
-				data = {{"status", "OK"}, {"email", req_json["email"]}};
+				res.set(http::field::content_type, "application/json");
 				beast::ostream(res.body()) << data.dump();
 				res.prepare_payload();
 
