@@ -18,3 +18,5 @@
 - RPC服务端
 
  Nodejs邮箱服务，服务之间通信gRPC
+ 
+ `npm install @grpc/grp-js @grpc/proto-loader nodemailer`
