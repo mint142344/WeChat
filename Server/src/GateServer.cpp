@@ -1,5 +1,8 @@
+#include "EmailVerifyClient.h"
 #include "Listener.h"
 #include "ConfigManger.h"
+#include "IoContextPool.h"
+#include "EmailVerifyClient.h"
 
 #include <fmt/base.h>
 #include <csignal>
@@ -10,16 +13,26 @@ int main(int argc, char* argv[]) {
 	net::signal_set signals(ioc, SIGINT, SIGTERM);
 
 	try {
-		// 读取配置文件
+		// 1.load config
 		ConfigManager::getInstance()->load("config.json");
-		tcp::endpoint ep({net::ip::make_address(ConfigManager::getInstance()->m_gate_ip),
-						  ConfigManager::getInstance()->m_gate_port});
+		const ConfigManager* config = ConfigManager::getInstance();
 
+		tcp::endpoint ep({net::ip::make_address(config->m_gate_ip), config->m_gate_port});
+
+		// 2.start io_context pool
+		IoContextPool::getInstance()->start(config->m_asio_io_context_pool_size);
+
+		// 3.init RPC pool
+		RpcServiceConnPool<EmailVerifyService>::getInstance()->init(config->m_email_rpc_host,
+																	config->m_email_rpc_port, 2);
+
+		// 4.register signal & gracefully quit
 		signals.async_wait([&ioc](const std::error_code& ec, int signal) {
 			ioc.stop();
 			fmt::println("Interrupted by a signal {}", signal);
 		});
 
+		// 5.start gate server
 		std::make_shared<Listener>(ioc, ep)->start();
 		fmt::println("Listening on {}:{}", ep.address().to_string(), ep.port());
 

@@ -2,6 +2,7 @@
 
 #include "Singleton.hpp"
 
+#include <cstdint>
 #include <string>
 
 class ConfigManager : public Singleton<ConfigManager> {
@@ -20,4 +21,9 @@ public:
 
 	std::string m_email_rpc_host;
 	uint16_t m_email_rpc_port;
+
+	std::string m_redis_host;
+	uint16_t m_redis_port;
+
+	uint32_t m_asio_io_context_pool_size;
 };

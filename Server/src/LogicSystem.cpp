@@ -4,8 +4,6 @@
 #include <fmt/base.h>
 #include <nlohmann/json.hpp>
 
-#include <string>
-
 using json = nlohmann::json;
 
 HttpResponse ErrorResponse::operator()(http::status status, const std::string& err_msg) {
@@ -46,7 +44,7 @@ LogicSystem::LogicSystem() {
 				}
 
 				// RPC call
-				json data = EmailVerifyClient::getInstance()->getEmailVerifyCode(req_json["email"]);
+				json data = RPC::getEmailVerifyCode(req_json["email"]);
 				if (data["status"] == "ok") {
 					res.result(http::status::ok);
 				} else {
