@@ -8,6 +8,7 @@
 #include <grpcpp/grpcpp.h>
 #include <algorithm>
 #include <chrono>
+#include <cstddef>
 #include <cstdint>
 #include <nlohmann/json.hpp>
 
@@ -41,8 +42,10 @@ public:
 	~RpcServiceConnPool() {}
 
 	void init(const std::string& host, uint16_t port, uint32_t pool_size) {
+		if (pool_size <= 0) pool_size = 1;
+		if (pool_size > 100) pool_size = 100;
+
 		std::lock_guard<std::mutex> lock(m_mtx);
-		m_pool_size = pool_size;
 
 		std::shared_ptr<Channel> channel = grpc::CreateChannel(host + ":" + std::to_string(port),
 															   grpc::InsecureChannelCredentials());
@@ -50,6 +53,23 @@ public:
 		for (int i = 0; i < pool_size; ++i) {
 			m_stubs.push_back({RpcService::NewStub(channel), false});
 		}
+	}
+
+	// 返回连接池大小
+	size_t size() const { return m_stubs.size(); }
+
+	// 返回空闲的 Stub 数量
+	size_t available() {
+		std::lock_guard<std::mutex> lock(m_mtx);
+		return std::count_if(m_stubs.begin(), m_stubs.end(),
+							 [](const Connection& conn) { return !conn.is_busy; });
+	}
+
+	size_t busy() {
+		std::lock_guard<std::mutex> lock(m_mtx);
+		return std::count_if(m_stubs.begin(), m_stubs.end(), [](const Connection& conn) {
+			return conn.stub == nullptr && conn.is_busy;
+		});
 	}
 
 	// 返回空闲的 Stub
@@ -75,8 +95,9 @@ public:
 	// 归还连接
 	void put(StubPtr stub) {
 		std::lock_guard<std::mutex> lock(m_mtx);
-		auto it = std::find_if(m_stubs.begin(), m_stubs.end(),
-							   [](Connection& conn) { return conn.is_busy; });
+		auto it = std::find_if(m_stubs.begin(), m_stubs.end(), [](Connection& conn) {
+			return conn.stub.get() == nullptr && conn.is_busy;
+		});
 
 		if (it != m_stubs.end()) {
 			it->stub = std::move(stub);
@@ -86,7 +107,6 @@ public:
 	}
 
 private:
-	uint32_t m_pool_size;
 	std::vector<Connection> m_stubs;
 
 	std::mutex m_mtx;

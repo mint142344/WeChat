@@ -1,32 +1,30 @@
-cmake_minimum_required(VERSION 3.20)
-
-project(WeChat-Server)
-
-# 启动测试
-enable_testing()
-add_subdirectory(test)
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 # Find required packages
 find_package(Boost CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(Protobuf CONFIG REQUIRED)
 find_package(gRPC CONFIG REQUIRED)
 find_package(fmt REQUIRED)
+find_package(GTest REQUIRED)
 find_library(HIREDIS_LIB hiredis)
 
 file(GLOB SOURCES src/*.cpp)
 file(GLOB PROTO_GEN_SOURCES gen/*.cc)
 
-add_executable(GateServer ${SOURCES} ${PROTO_GEN_SOURCES})
-target_link_libraries(GateServer PRIVATE
-    Boost::boost
+include_directories(../include ../gen)
+
+file(GLOB PROTO_FILES ../gen/*.cc)
+
+# 测试 grpc 连接池
+add_executable(test_rpc_pool
+    test_rpc_pool.cpp ${PROTO_FILES}
+    ../src/ConfigManger.cpp ../src/EmailVerifyClient.cpp)
+add_test(NAME test_rpc_pool COMMAND test_rpc_pool)
+
+target_link_libraries(test_rpc_pool PRIVATE
     nlohmann_json::nlohmann_json
     fmt::fmt
     gRPC::grpc++
     protobuf
-    ${HIREDIS_LIB}
+    GTest::GTest
+    GTest::Main
 )
-target_include_directories(GateServer PRIVATE include gen)

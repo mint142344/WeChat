@@ -27,6 +27,9 @@ async function getEmailVerifyCode(call, callback) {
         // 等待 邮件发送成功
         await sendEmail(email, verificationCode);
 
+        // 测试 grpc 客户端连接池
+        // await new Promise(resolve => setTimeout(resolve, 50 + Math.random() * 100));
+
         callback(null, {
             status: "ok",
             code: verificationCode,

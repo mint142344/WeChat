@@ -23,8 +23,9 @@ int main(int argc, char* argv[]) {
 		IoContextPool::getInstance()->start(config->m_asio_io_context_pool_size);
 
 		// 3.init RPC pool
-		RpcServiceConnPool<EmailVerifyService>::getInstance()->init(config->m_email_rpc_host,
-																	config->m_email_rpc_port, 2);
+		RpcServiceConnPool<EmailVerifyService>::getInstance()->init(
+			config->m_email_rpc_host, config->m_email_rpc_port,
+			config->m_rpc_service_conn_pool_size);
 
 		// 4.register signal & gracefully quit
 		signals.async_wait([&ioc](const std::error_code& ec, int signal) {

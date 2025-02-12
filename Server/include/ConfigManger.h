@@ -26,4 +26,5 @@ public:
 	uint16_t m_redis_port;
 
 	uint32_t m_asio_io_context_pool_size;
+	uint32_t m_rpc_service_conn_pool_size;
 };
