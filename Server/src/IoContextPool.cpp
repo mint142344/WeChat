@@ -5,9 +5,9 @@ IoContextPool::~IoContextPool() { stop(); }
 void IoContextPool::start(uint32_t pool_size) {
 	m_pool_size = pool_size;
 
-	if (m_pool_size <= 0) {
-		m_pool_size = 2;
-	}
+	if (m_pool_size <= 0)
+		throw std::invalid_argument("IoContextPool::start: pool_size must be greater than 0");
+
 	if (m_pool_size > std::thread::hardware_concurrency()) {
 		m_pool_size = std::thread::hardware_concurrency();
 	}
@@ -26,14 +26,25 @@ void IoContextPool::start(uint32_t pool_size) {
 }
 
 void IoContextPool::stop() {
-	for (int i = 0; i < m_pool_size; ++i) {
-		m_contexts[i]->stop();
-		m_work_guards[i].reset();
+	// 重置work_guard，io_context 在没有工作时退出
+	for (auto& guard : m_work_guards) {
+		guard.reset();
+	}
+	for (auto& ctx : m_contexts) {
+		ctx->stop();
 	}
 
+	// 等待所有线程完成
 	for (auto& t : m_threads) {
 		t.join();
 	}
+
+	// NOTE: 清理资源
+	m_threads.clear();
+	m_work_guards.clear();
+	m_contexts.clear();
+	m_pool_size = 0;
+	m_next_index = 0;
 }
 
 net::io_context& IoContextPool::getIoContext() { return *m_contexts[m_next_index++ % m_pool_size]; }

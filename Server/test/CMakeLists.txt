@@ -17,7 +17,7 @@ file(GLOB PROTO_FILES ../gen/*.cc)
 # 测试 grpc 连接池
 add_executable(test_rpc_pool
     test_rpc_pool.cpp ${PROTO_FILES}
-    ../src/ConfigManger.cpp ../src/EmailVerifyClient.cpp)
+    ../src/EmailVerifyClient.cpp)
 add_test(NAME test_rpc_pool COMMAND test_rpc_pool)
 
 target_link_libraries(test_rpc_pool PRIVATE
@@ -28,3 +28,17 @@ target_link_libraries(test_rpc_pool PRIVATE
     GTest::GTest
     GTest::Main
 )
+
+# 测试 asio io_context 池
+add_executable(test_io_context_pool
+    test_io_context_pool.cpp
+    ../src/IoContextPool.cpp)
+add_test(NAME test_io_context_pool COMMAND test_io_context_pool)
+target_link_libraries(test_io_context_pool PRIVATE
+    Boost::boost
+    GTest::GTest
+    GTest::Main
+    fmt::fmt
+)
+
+# 测试 redis 连接池
