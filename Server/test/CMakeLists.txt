@@ -42,3 +42,13 @@ target_link_libraries(test_io_context_pool PRIVATE
 )
 
 # 测试 redis 连接池
+add_executable(test_redis_pool
+    test_redis_pool.cpp
+    ../src/RedisConnPool.cpp)
+add_test(NAME test_redis_pool COMMAND test_redis_pool)
+target_link_libraries(test_redis_pool PRIVATE
+    GTest::GTest
+    GTest::Main
+    fmt::fmt
+    ${HIREDIS_LIB}
+)

@@ -24,6 +24,8 @@ constexpr uint16_t REDIS_PORT = 6379;
 constexpr uint32_t ASIO_IO_CONTEXT_POOL_SIZE = 2;
 // RCP Service连接池大小
 constexpr uint32_t RPC_SERVICE_CONN_POOL_SIZE = 2;
+// Redis连接池大小
+constexpr uint32_t REDIS_CONN_POOL_SIZE = 2;
 
 void ConfigManager::load(const std::string& path) {
 	std::ifstream ifs(path);
@@ -55,6 +57,7 @@ void ConfigManager::load(const std::string& path) {
 
 	m_asio_io_context_pool_size = j["asio_io_context_pool_size"].get<uint32_t>();
 	m_rpc_service_conn_pool_size = j["rpc_service_conn_pool_size"].get<uint32_t>();
+	m_redis_conn_pool_size = j["redis_conn_pool_size"].get<uint32_t>();
 }
 
 void ConfigManager::createDefaultConfig(const std::string& path) {
@@ -71,6 +74,7 @@ void ConfigManager::createDefaultConfig(const std::string& path) {
 
 	m_asio_io_context_pool_size = ASIO_IO_CONTEXT_POOL_SIZE;
 	m_rpc_service_conn_pool_size = RPC_SERVICE_CONN_POOL_SIZE;
+	m_redis_conn_pool_size = REDIS_CONN_POOL_SIZE;
 
 	json j;
 	j["gate_ip"] = m_gate_ip;
@@ -81,6 +85,7 @@ void ConfigManager::createDefaultConfig(const std::string& path) {
 	j["redis_port"] = m_redis_port;
 	j["asio_io_context_pool_size"] = m_asio_io_context_pool_size;
 	j["rpc_service_conn_pool_size"] = m_rpc_service_conn_pool_size;
+	j["redis_conn_pool_size"] = m_redis_conn_pool_size;
 
 	ofs << j.dump(4);
 }
