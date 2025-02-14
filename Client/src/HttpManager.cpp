@@ -53,7 +53,26 @@ void HttpManager::post(const QString& route, const QJsonObject& json, ModuleType
 		if (reply->error() != QNetworkReply::NoError) {
 			qDebug() << "[QNetworkReply::finished]" << reply->errorString();
 			obj["status"] = "error";
-			obj["message"] = reply->errorString();
+			switch (reply->error()) {
+				case QNetworkReply::HostNotFoundError:
+					obj["message"] = "服务器未找到";
+					break;
+				case QNetworkReply::TimeoutError:
+					obj["message"] = "请求超时";
+					break;
+				case QNetworkReply::ConnectionRefusedError:
+					obj["message"] = "连接被拒绝";
+					break;
+				case QNetworkReply::RemoteHostClosedError:
+					obj["message"] = "远程主机关闭连接";
+					break;
+				case QNetworkReply::InternalServerError:
+					obj["message"] = "服务器内部错误";
+					break;
+				default:
+					obj["message"] = reply->errorString();
+					break;
+			}
 		}
 
 		// 派发信号 给对应的模块

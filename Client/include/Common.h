@@ -2,7 +2,7 @@
 
 enum class RequestType {
 	GET_VERIFICATION_CODE, // 获取验证码
-	REGISTER,			   // 注册
+	NEW_USER,			   // 注册
 
 };
 
