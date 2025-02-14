@@ -19,7 +19,7 @@ function sendEmail(email, code) {
         from: config.email_user,
         to: email,
         subject: 'Verification Code',
-        text: `Your verification code is ${code}`
+        text: `Your verification code is ${code}, valid for 3 minutes.`
     };
 
     return new Promise((resolve, reject) => {

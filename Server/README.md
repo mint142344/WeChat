@@ -17,6 +17,6 @@
  `GateServer`搭建邮箱验证 RPC 服务客户端(单例)
 - RPC服务端
 
- Nodejs邮箱服务，服务之间通信gRPC
+ Nodejs实现rpc server，完成邮箱服务
  
- `npm install @grpc/grp-js @grpc/proto-loader nodemailer`
+ `npm install @grpc/grp-js @grpc/proto-loader nodemailer ioredis`

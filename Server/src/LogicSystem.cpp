@@ -2,7 +2,9 @@
 #include "EmailVerifyClient.h"
 
 #include <fmt/base.h>
+#include <exception>
 #include <nlohmann/json.hpp>
+#include <string>
 
 using json = nlohmann::json;
 
@@ -61,6 +63,31 @@ LogicSystem::LogicSystem() {
 				return;
 			}
 		});
+
+	// POST /register
+	registerRoute("/register", http::verb::post, [this](const HttpRequest& req, HttpResponse& res) {
+		fmt::println("post /register");
+		json data;
+		try {
+			json req_json = json::parse(req.body());
+
+			fmt::println(
+				"  username:{}\n  password:{}\n  email:{}\n  verify_code:{}",
+				req_json["username"].get<std::string>(), req_json["password"].get<std::string>(),
+				req_json["email"].get<std::string>(), req_json["verify_code"].get<std::string>());
+
+			res.result(http::status::ok);
+			res.set(http::field::content_type, "application/json");
+			json data = {{"status", "error"}, {"message", "Register failed"}};
+			beast::ostream(res.body()) << data.dump();
+			res.prepare_payload();
+
+		} catch (const std::exception& e) {
+			// json parse failed
+			res = ErrorResponse{}(http::status::bad_request, "Incorrect request format");
+			return;
+		}
+	});
 }
 
 bool LogicSystem::handleRequest(const std::string& route, const HttpRequest& req,

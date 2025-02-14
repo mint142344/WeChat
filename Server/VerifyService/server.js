@@ -2,6 +2,7 @@ const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
 const path = require('path');
 const sendEmail = require('./email').sendEmail;
+const redisClient = require('./redis').redisClient;
 
 
 // Load protobuf file
@@ -24,11 +25,10 @@ async function getEmailVerifyCode(call, callback) {
         // 随机生成一个6位数的验证码
         const verificationCode = String(Math.floor(100000 + Math.random() * 900000));
 
-        // 等待 邮件发送成功
+        // 发送邮件
         await sendEmail(email, verificationCode);
-
-        // 测试 grpc 客户端连接池
-        // await new Promise(resolve => setTimeout(resolve, 50 + Math.random() * 100));
+        // 存储验证码到 Redis
+        await redisClient.setEamilVerifyCode(email, verificationCode);
 
         callback(null, {
             status: "ok",
