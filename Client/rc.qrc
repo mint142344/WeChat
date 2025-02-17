@@ -3,5 +3,14 @@
         <file>style/styleSheet.qss</file>
         <file>images/default_avatar.png</file>
         <file>images/app.ico</file>
+        <file>images/close.png</file>
+        <file>images/passwd.png</file>
+        <file>images/passwd-focus.png</file>
+        <file>images/passwd-invisible.png</file>
+        <file>images/passwd-invisible-hover.png</file>
+        <file>images/passwd-visible.png</file>
+        <file>images/passwd-visible-hover.png</file>
+        <file>images/user.png</file>
+        <file>images/user-focus.png</file>
     </qresource>
 </RCC>

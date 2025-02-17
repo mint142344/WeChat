@@ -7,8 +7,16 @@ QLabel#label_avatar {
     border-image: url(:/images/default_avatar.png);
 }
 
-/* Username Combobox */
+/* 右上角 关闭按钮*/
+QPushButton#button_close {
+    border-image: url(:/images/close.png);
+}
 
+QPushButton#button_close:hover {
+    background-color: rgb(254, 83, 57);
+}
+
+/* Username Combobox */
 QComboBox#comboBox_username QAbstractItemView::item {
     height: 40px;
 }

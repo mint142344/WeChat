@@ -131,7 +131,7 @@ void RegisterDialog::registerAllCallback() {
 			return;
 		} else {
 			setErrorHint(false, "注册成功");
-			QMessageBox::information(this, "注册成功", "注册成功，请登录");
+			QMessageBox::information(this, "注册成功", "点击返回登录");
 			accept();
 		}
 	});
