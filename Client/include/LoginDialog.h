@@ -15,6 +15,10 @@ public:
 	~LoginDialog();
 
 private:
+	void initUi();
+	void setShadow();
+
+private:
 	Ui::LoginDialog *ui;
 };
 
