@@ -17,6 +17,11 @@ find_package(gRPC CONFIG REQUIRED)
 find_package(fmt REQUIRED)
 find_library(HIREDIS_LIB hiredis)
 
+# mysql-connector-c++-8.0.33
+set(LIB_MYSQL_CONNECTOR_INLCUDE /usr/local/mysql/connector-c++-8.0.33/include)
+set(LIB_MYSQL_CONNECTOR_DIR /usr/local/mysql/connector-c++-8.0.33/lib64/debug)
+find_library(LIB_MYSQL_CONNECTOR_CPP NAMES mysqlcppconn PATHS ${LIB_MYSQL_CONNECTOR_DIR} REQUIRED)
+
 file(GLOB SOURCES src/*.cpp)
 file(GLOB PROTO_GEN_SOURCES gen/*.cc)
 
@@ -28,5 +33,6 @@ target_link_libraries(GateServer PRIVATE
     gRPC::grpc++
     protobuf
     ${HIREDIS_LIB}
+    ${LIB_MYSQL_CONNECTOR_CPP}
 )
-target_include_directories(GateServer PRIVATE include gen)
+target_include_directories(GateServer PRIVATE include gen ${LIB_MYSQL_CONNECTOR_INLCUDE})
