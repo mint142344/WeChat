@@ -2,7 +2,7 @@
 #include "ui_LoginDialog.h"
 #include "RegisterDialog.h"
 #include "DragWidgetFilter.h"
-#include "custom/LineEdit.h"
+#include "custom/PasswdLineEdit.h"
 
 #include <QGraphicsDropShadowEffect>
 #include <QIcon>
@@ -13,10 +13,6 @@
 LoginDialog::LoginDialog(QWidget* parent) : QDialog(parent), ui(new Ui::LoginDialog) {
 	ui->setupUi(this);
 	initUi();
-
-	if (QLineEdit* lineEdit = ui->comboBox_username->lineEdit()) {
-		lineEdit->setPlaceholderText("请输入用户名");
-	}
 
 	// 无边框
 	setWindowFlag(Qt::FramelessWindowHint, true);
@@ -38,21 +34,26 @@ LoginDialog::LoginDialog(QWidget* parent) : QDialog(parent), ui(new Ui::LoginDia
 LoginDialog::~LoginDialog() { delete ui; }
 
 void LoginDialog::initUi() {
-	// 用户名 leading action
-	ui->comboBox_username->setLineEdit(new LineEdit(this));
-	LineEdit* lineEdit = qobject_cast<LineEdit*>(ui->comboBox_username->lineEdit());
+	if (QLineEdit* lineEdit = ui->comboBox_username->lineEdit()) {
+		lineEdit->setPlaceholderText("请输入用户名");
+	}
 
-	if (lineEdit) {
-		lineEdit->setLeadingAction(new QAction(QIcon(":/images/user.png"), "", lineEdit));
-		lineEdit->setLeadingFocusAction(
-			new QAction(QIcon(":/images/user-focus.png"), "", lineEdit));
+	// 用户名 leading action
+	ui->comboBox_username->setLineEdit(new PasswdLineEdit(this));
+	PasswdLineEdit* passwdLineEdit =
+		qobject_cast<PasswdLineEdit*>(ui->comboBox_username->lineEdit());
+	if (passwdLineEdit) {
+		passwdLineEdit->setLeadingIcon(":/images/user.png", ":/images/user-focus.png");
+		passwdLineEdit->setAttachment(false, true);
 	}
 
 	// 密码 leading action
-	ui->lineEdit_password->setLeadingAction(
-		new QAction(QIcon(":/images/passwd.png"), "", ui->lineEdit_password));
-	ui->lineEdit_password->setLeadingFocusAction(
-		new QAction(QIcon(":/images/passwd-focus.png"), "", ui->lineEdit_password));
+	ui->lineEdit_password->setLeadingIcon(":/images/passwd.png", ":/images/passwd-focus.png");
+	ui->lineEdit_password->setVisbleIcon(":/images/passwd-visible.png",
+										 ":/images/passwd-visible-hover.png");
+	ui->lineEdit_password->setInvisbleIcon(":/images/passwd-invisible.png",
+										   ":/images/passwd-invisible-hover.png");
+	ui->lineEdit_password->setAttachment(true, true);
 
 	ui->comboBox_username->setFocus();
 }

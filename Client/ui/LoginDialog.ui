@@ -76,7 +76,7 @@ border: 2px solid #cccccc;</string>
      <bool>true</bool>
     </property>
    </widget>
-   <widget class="LineEdit" name="lineEdit_password">
+   <widget class="PasswdLineEdit" name="lineEdit_password">
     <property name="geometry">
      <rect>
       <x>35</x>
@@ -256,9 +256,9 @@ border-radius: 8px;</string>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>LineEdit</class>
+   <class>PasswdLineEdit</class>
    <extends>QLineEdit</extends>
-   <header>custom/LineEdit.h</header>
+   <header>custom/PasswdLineEdit.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

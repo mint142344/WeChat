@@ -11,7 +11,9 @@ HttpManager::HttpManager(QObject* parent)
 	: QObject{parent}, m_net_manager{new QNetworkAccessManager(this)} {
 	QString path =
 		QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation) + "/wechat_config.ini";
+	m_net_manager->setTransferTimeout(10000);
 
+	// 配置文件
 	QSettings settings(path, QSettings::Format::IniFormat);
 	QString host = settings.value("GateServer/host", "").toString();
 	uint16_t port = settings.value("GateServer/port", 0).toUInt();
@@ -28,11 +30,12 @@ HttpManager::HttpManager(QObject* parent)
 
 void HttpManager::post(const QString& route, const QJsonObject& json, ModuleType module_type,
 					   RequestType request_type) {
-	// 创建请求 with header
-	QNetworkRequest request(m_url_prefix + route);
 	// qDebug() << __PRETTY_FUNCTION__ << __LINE__ << m_url_prefix + route;
 
+	// 创建请求 with header
+	QNetworkRequest request(m_url_prefix + route);
 	request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
 	QByteArray data = QJsonDocument(json).toJson();
 	request.setHeader(QNetworkRequest::ContentLengthHeader, data.length());
 
@@ -52,11 +55,14 @@ void HttpManager::post(const QString& route, const QJsonObject& json, ModuleType
 
 		if (reply->error() != QNetworkReply::NoError) {
 			qDebug() << "[QNetworkReply::finished]" << reply->errorString();
+
 			obj["status"] = "error";
+
 			switch (reply->error()) {
 				case QNetworkReply::HostNotFoundError:
 					obj["message"] = "服务器未找到";
 					break;
+				case QNetworkReply::OperationCanceledError:
 				case QNetworkReply::TimeoutError:
 					obj["message"] = "请求超时";
 					break;

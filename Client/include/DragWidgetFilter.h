@@ -6,10 +6,10 @@
 class DragWidgetFilter : public QObject {
 	Q_OBJECT
 public:
-	explicit DragWidgetFilter(QObject *parent = nullptr);
+	explicit DragWidgetFilter(QObject* parent = nullptr);
 
 protected:
-	bool eventFilter(QObject *watched, QEvent *event) override;
+	bool eventFilter(QObject* watched, QEvent* event) override;
 
 private:
 	bool m_mouse_press;

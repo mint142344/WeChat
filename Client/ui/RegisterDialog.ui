@@ -106,12 +106,12 @@
     <string>取消</string>
    </property>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>40</x>
      <y>120</y>
-     <width>331</width>
+     <width>338</width>
      <height>261</height>
     </rect>
    </property>
@@ -201,7 +201,7 @@
      </widget>
     </item>
     <item row="2" column="1" colspan="2">
-     <widget class="QLineEdit" name="lineEdit_password">
+     <widget class="PasswdLineEdit" name="lineEdit_password">
       <property name="minimumSize">
        <size>
         <width>250</width>
@@ -218,6 +218,9 @@
        <font>
         <pointsize>11</pointsize>
        </font>
+      </property>
+      <property name="maxLength">
+       <number>15</number>
       </property>
       <property name="echoMode">
        <enum>QLineEdit::EchoMode::Password</enum>
@@ -240,7 +243,7 @@
      </widget>
     </item>
     <item row="3" column="1" colspan="2">
-     <widget class="QLineEdit" name="lineEdit_confirmPassword">
+     <widget class="PasswdLineEdit" name="lineEdit_confirmPassword">
       <property name="minimumSize">
        <size>
         <width>250</width>
@@ -257,6 +260,9 @@
        <font>
         <pointsize>11</pointsize>
        </font>
+      </property>
+      <property name="maxLength">
+       <number>15</number>
       </property>
       <property name="echoMode">
        <enum>QLineEdit::EchoMode::Password</enum>
@@ -303,7 +309,7 @@
      </widget>
     </item>
     <item row="4" column="2">
-     <widget class="QPushButton" name="button_sendCode">
+     <widget class="TimerButton" name="button_get_code">
       <property name="minimumSize">
        <size>
         <width>80</width>
@@ -322,7 +328,7 @@
        </font>
       </property>
       <property name="text">
-       <string>发送验证码</string>
+       <string>获取验证码</string>
       </property>
      </widget>
     </item>
@@ -341,7 +347,7 @@
        </size>
       </property>
       <property name="text">
-       <string></string>
+       <string/>
       </property>
       <property name="alignment">
        <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -351,6 +357,35 @@
    </layout>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>TimerButton</class>
+   <extends>QPushButton</extends>
+   <header>custom/TimerButton.h</header>
+  </customwidget>
+  <customwidget>
+   <class>PasswdLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>custom/PasswdLineEdit.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>button_cancel</sender>
+   <signal>clicked()</signal>
+   <receiver>RegisterDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>283</x>
+     <y>428</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>402</x>
+     <y>410</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
