@@ -288,13 +288,13 @@
      <widget class="QLineEdit" name="lineEdit_verificationCode">
       <property name="minimumSize">
        <size>
-        <width>180</width>
+        <width>170</width>
         <height>40</height>
        </size>
       </property>
       <property name="maximumSize">
        <size>
-        <width>180</width>
+        <width>170</width>
         <height>40</height>
        </size>
       </property>
@@ -326,6 +326,9 @@
        <font>
         <pointsize>10</pointsize>
        </font>
+      </property>
+      <property name="focusPolicy">
+       <enum>Qt::FocusPolicy::NoFocus</enum>
       </property>
       <property name="text">
        <string>获取验证码</string>
@@ -359,14 +362,14 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>TimerButton</class>
-   <extends>QPushButton</extends>
-   <header>custom/TimerButton.h</header>
-  </customwidget>
-  <customwidget>
    <class>PasswdLineEdit</class>
    <extends>QLineEdit</extends>
    <header>custom/PasswdLineEdit.h</header>
+  </customwidget>
+  <customwidget>
+   <class>TimerButton</class>
+   <extends>QPushButton</extends>
+   <header>custom/TimerButton.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

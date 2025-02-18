@@ -14,9 +14,14 @@ public:
 	explicit LoginDialog(QWidget* parent = nullptr);
 	~LoginDialog();
 
+private slots:
+	void on_button_login_clicked();
+
 private:
 	void initUi();
 	void setShadow();
+	// 设置 UI 错误提示
+	void setErrorHint(bool isError, const QString& hint);
 
 private:
 	Ui::LoginDialog* ui;

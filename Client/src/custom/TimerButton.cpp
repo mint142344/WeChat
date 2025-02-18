@@ -1,9 +1,7 @@
 #include "custom/TimerButton.h"
-#include <qtimer.h>
-
 #include <QTimer>
 
-TimerButton::TimerButton(QWidget *parent) : m_timer{new QTimer(this)} {
+TimerButton::TimerButton(QWidget* parent) : QPushButton(parent), m_timer{new QTimer(this)} {
 	connect(m_timer, &QTimer::timeout, [this]() {
 		if (m_counter <= 0) {
 			stopTimer();

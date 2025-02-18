@@ -23,8 +23,8 @@ RegisterDialog::RegisterDialog(QWidget* parent) : QDialog(parent), ui(new Ui::Re
 	// 注册网络请求回调
 	registerAllCallback();
 
-	connect(HttpManager::getInstance(), &HttpManager::sig_module_register_finished, this,
-			&RegisterDialog::http_request_finished);
+	connect(HttpManager::getInstance(), &HttpManager::sig_module_user_finished, this,
+			&RegisterDialog::handle_http_response);
 }
 
 RegisterDialog::~RegisterDialog() { delete ui; }
@@ -103,6 +103,9 @@ void RegisterDialog::initUi() {
 
 	// qss 属性设置
 	ui->label_errorhint->setProperty("error", false);
+
+	// 设置焦点 输入用户名
+	ui->lineEdit_username->setFocus();
 }
 
 void RegisterDialog::on_lineEdit_email_editingFinished() {
@@ -133,11 +136,10 @@ void RegisterDialog::on_button_confirm_clicked() {
 	json["email"] = ui->lineEdit_email->text();
 	json["verify_code"] = ui->lineEdit_verificationCode->text();
 
-	HttpManager::getInstance()->post("/register", json, ModuleType::REGISTER,
-									 RequestType::NEW_USER);
+	HttpManager::getInstance()->post("/register", json, ModuleType::USER, RequestType::NEW_USER);
 }
 
-void RegisterDialog::http_request_finished(RequestType request_type, const QJsonObject& json) {
+void RegisterDialog::handle_http_response(RequestType request_type, const QJsonObject& json) {
 	// 处理不同的请求
 	try {
 		m_request_map[request_type](json);
@@ -191,7 +193,7 @@ void RegisterDialog::on_button_get_code_clicked() {
 	QJsonObject json;
 	json["email"] = email;
 
-	HttpManager::getInstance()->post("/verify_code", json, ModuleType::REGISTER,
+	HttpManager::getInstance()->post("/verify_code", json, ModuleType::USER,
 									 RequestType::GET_VERIFICATION_CODE);
 	// 开始计时
 	ui->button_get_code->startTimer();

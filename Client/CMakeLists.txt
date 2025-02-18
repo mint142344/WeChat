@@ -15,7 +15,6 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets Network)
 
 file(GLOB_RECURSE SOURCES "${CMAKE_SOURCE_DIR}/src/*.cpp")
 file(GLOB_RECURSE HEADERS "${CMAKE_SOURCE_DIR}/include/*.h")
-file(GLOB_RECURSE UI_FILES "${CMAKE_SOURCE_DIR}/ui/*.ui")
 
 add_executable(WeChat rc.qrc ${SOURCES} ${HEADERS} ${UI_SOURCES})
 

@@ -22,8 +22,8 @@ private:
 	// 派发信号
 	void dispatchSingnal(ModuleType module_type, RequestType request_type, const QJsonObject& json);
 signals:
-	// 注册模块信号
-	void sig_module_register_finished(RequestType request_type, const QJsonObject& json);
+	// 用户模块(注册/找回密码)信号
+	void sig_module_user_finished(RequestType request_type, const QJsonObject& json);
 	// 登录模块信号
 	void sig_module_login_finished(RequestType request_type, const QJsonObject& json);
 

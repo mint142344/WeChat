@@ -28,8 +28,8 @@ private slots:
 	void on_button_get_code_clicked();
 	// 确认注册
 	void on_button_confirm_clicked();
-
-	void http_request_finished(RequestType request_type, const QJsonObject& json);
+	// 收到网络请求 执行回调
+	void handle_http_response(RequestType request_type, const QJsonObject& json);
 
 private:
 	// 注册网络请求回调

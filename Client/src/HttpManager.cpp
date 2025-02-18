@@ -89,8 +89,8 @@ void HttpManager::post(const QString& route, const QJsonObject& json, ModuleType
 void HttpManager::dispatchSingnal(ModuleType module_type, RequestType request_type,
 								  const QJsonObject& json) {
 	switch (module_type) {
-		case ModuleType::REGISTER:
-			emit sig_module_register_finished(request_type, json);
+		case ModuleType::USER:
+			emit sig_module_user_finished(request_type, json);
 			break;
 		case ModuleType::LOGIN:
 			emit sig_module_login_finished(request_type, json);

@@ -50,7 +50,7 @@
     <property name="geometry">
      <rect>
       <x>100</x>
-      <y>50</y>
+      <y>40</y>
       <width>120</width>
       <height>120</height>
      </rect>
@@ -80,21 +80,21 @@ border: 2px solid #cccccc;</string>
     <property name="geometry">
      <rect>
       <x>35</x>
-      <y>254</y>
+      <y>240</y>
       <width>250</width>
-      <height>40</height>
+      <height>45</height>
      </rect>
     </property>
     <property name="minimumSize">
      <size>
       <width>250</width>
-      <height>40</height>
+      <height>45</height>
      </size>
     </property>
     <property name="maximumSize">
      <size>
       <width>250</width>
-      <height>40</height>
+      <height>45</height>
      </size>
     </property>
     <property name="echoMode">
@@ -104,11 +104,11 @@ border: 2px solid #cccccc;</string>
      <string>请输入密码</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_login">
+   <widget class="QPushButton" name="button_login">
     <property name="geometry">
      <rect>
       <x>35</x>
-      <y>312</y>
+      <y>320</y>
       <width>250</width>
       <height>35</height>
      </rect>
@@ -144,7 +144,7 @@ border-radius: 8px;</string>
     <property name="geometry">
      <rect>
       <x>90</x>
-      <y>370</y>
+      <y>380</y>
       <width>60</width>
       <height>20</height>
      </rect>
@@ -168,8 +168,8 @@ border-radius: 8px;</string>
    <widget class="QLabel" name="label_forgot_password">
     <property name="geometry">
      <rect>
-      <x>156</x>
-      <y>370</y>
+      <x>170</x>
+      <y>380</y>
       <width>60</width>
       <height>20</height>
      </rect>
@@ -197,21 +197,21 @@ border-radius: 8px;</string>
     <property name="geometry">
      <rect>
       <x>35</x>
-      <y>198</y>
+      <y>180</y>
       <width>250</width>
-      <height>45</height>
+      <height>48</height>
      </rect>
     </property>
     <property name="minimumSize">
      <size>
       <width>250</width>
-      <height>45</height>
+      <height>48</height>
      </size>
     </property>
     <property name="maximumSize">
      <size>
       <width>250</width>
-      <height>40</height>
+      <height>48</height>
      </size>
     </property>
     <property name="editable">
@@ -252,6 +252,34 @@ border-radius: 8px;</string>
      <string/>
     </property>
    </widget>
+   <widget class="QLabel" name="label_errorhint">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>290</y>
+      <width>300</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>300</width>
+      <height>25</height>
+     </size>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>300</width>
+      <height>25</height>
+     </size>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignmentFlag::AlignCenter</set>
+    </property>
+   </widget>
   </widget>
  </widget>
  <customwidgets>
@@ -264,7 +292,7 @@ border-radius: 8px;</string>
  <tabstops>
   <tabstop>comboBox_username</tabstop>
   <tabstop>lineEdit_password</tabstop>
-  <tabstop>pushButton_login</tabstop>
+  <tabstop>button_login</tabstop>
   <tabstop>button_close</tabstop>
  </tabstops>
  <resources/>
