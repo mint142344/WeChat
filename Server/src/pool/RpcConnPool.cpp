@@ -1,22 +1,21 @@
-#include "EmailVerifyClient.h"
+#include "pool/RpcConnPool.h"
 #include <fmt/base.h>
 #include <grpcpp/support/status.h>
-#include <cstdio>
-#include "message.grpc.pb.h"
 
 json RPC::getEmailVerifyCode(const std::string& email) {
 	// 取出一个空闲的 Stub
-	std::unique_ptr<EmailVerifyService::Stub> stub =
-		RpcServiceConnPool<EmailVerifyService>::getInstance()->get();
+	std::shared_ptr<EmailVerifyService::Stub> stub =
+		RpcServiceConnPool<EmailVerifyService>::getInstance()->getConnection();
 	if (!stub) {
 		return {{"status", "error"}, {"message", "No available connection to email server"}};
 	}
 
 	// RAII 归还 Stub
 	struct StubGuard {
-		std::unique_ptr<EmailVerifyService::Stub> stub;
+		std::shared_ptr<EmailVerifyService::Stub> stub;
 		~StubGuard() {
-			RpcServiceConnPool<EmailVerifyService>::getInstance()->put(std::move(stub));
+			RpcServiceConnPool<EmailVerifyService>::getInstance()->releaseConnection(
+				std::move(stub));
 		}
 	} guard{std::move(stub)};
 

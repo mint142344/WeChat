@@ -22,8 +22,8 @@ set(LIB_MYSQL_CONNECTOR_INLCUDE /usr/local/mysql/connector-c++-8.0.33/include)
 set(LIB_MYSQL_CONNECTOR_DIR /usr/local/mysql/connector-c++-8.0.33/lib64/debug)
 find_library(LIB_MYSQL_CONNECTOR_CPP NAMES mysqlcppconn PATHS ${LIB_MYSQL_CONNECTOR_DIR} REQUIRED)
 
-file(GLOB SOURCES src/*.cpp)
-file(GLOB PROTO_GEN_SOURCES gen/*.cc)
+file(GLOB_RECURSE SOURCES src/*.cpp)
+file(GLOB_RECURSE PROTO_GEN_SOURCES gen/*.cc)
 
 add_executable(GateServer ${SOURCES} ${PROTO_GEN_SOURCES})
 target_link_libraries(GateServer PRIVATE

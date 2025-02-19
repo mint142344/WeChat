@@ -1,10 +1,12 @@
-#include "RedisConnPool.h"
+#include "pool/RedisConnPool.h"
 
+#include <fmt/format.h>
 #include <hiredis/hiredis.h>
 #include <cassert>
 #include <fmt/core.h>
 #include <memory>
 #include <mutex>
+#include <stdexcept>
 #include <string>
 
 RedisConnection::RedisConnection(redisContext* context) : m_context{context} {}
@@ -190,50 +192,56 @@ RedisConnPool::~RedisConnPool() {
 	std::lock_guard<std::mutex> lock(m_mtx);
 	m_connections.clear();
 	m_pool_size = 0;
+	m_initialized = false;
 }
 
 void RedisConnPool::init(const std::string& ip, uint16_t port, uint32_t pool_size) {
 	if (pool_size <= 0) throw std::invalid_argument("pool_size must be greater than 0");
 
-	if (!m_connections.empty()) return;
-
-	m_pool_size = pool_size;
-
 	std::lock_guard<std::mutex> lock(m_mtx);
 
-	for (int i = 0; i < m_pool_size; ++i) {
+	// 防止重复初始化
+	if (m_initialized) return;
+
+	for (int i = 0; i < pool_size; ++i) {
 		redisContext* context = redisConnect(ip.c_str(), port);
+
 		if (context == nullptr || context->err) {
 			if (context) {
-				fmt::print("Error: {}\n", context->errstr);
 				redisFree(context);
-			} else {
-				fmt::print("Can't allocate redis context\n");
+				throw std::runtime_error(fmt::format("Redis conn pool: {}", context->errstr));
 			}
+
 			throw std::runtime_error("Can't connect to redis server");
 		}
 
 		m_connections.emplace_back(std::make_shared<RedisConnection>(context));
 	}
+
+	m_pool_size = pool_size;
+	m_initialized = true;
 }
 
+bool RedisConnPool::initialized() const { return m_initialized; }
+
 RedisConnPtr RedisConnPool::getConnection(std::chrono::seconds timeout) {
+	if (!initialized()) throw std::runtime_error("Redis connection pool not initialized");
+
 	std::unique_lock<std::mutex> lock(m_mtx);
 
 	if (m_connections.empty()) {
 		m_cv.wait_for(lock, timeout, [this] { return !m_connections.empty(); });
 	}
 
-	if (m_connections.empty())
-		return nullptr;
-	else {
-		RedisConnPtr conn = m_connections.front();
-		m_connections.pop_front();
-		return conn;
-	}
+	if (m_connections.empty()) return nullptr;
+
+	RedisConnPtr conn = m_connections.front();
+	m_connections.pop_front();
+	return conn;
 }
 
 void RedisConnPool::releaseConnection(RedisConnPtr conn) {
+	if (!initialized()) throw std::runtime_error("Redis connection pool not initialized");
 	if (!conn) return;
 
 	std::lock_guard<std::mutex> lock(m_mtx);
@@ -242,9 +250,15 @@ void RedisConnPool::releaseConnection(RedisConnPtr conn) {
 	m_cv.notify_one();
 }
 
-size_t RedisConnPool::available() {
+size_t RedisConnPool::available() const {
+	if (!initialized()) return 0;
+
 	std::lock_guard<std::mutex> lock(m_mtx);
 	return m_connections.size();
 }
 
-size_t RedisConnPool::size() const { return m_pool_size; }
+size_t RedisConnPool::size() const {
+	if (!m_initialized) return 0;
+
+	return m_pool_size;
+}

@@ -6,15 +6,13 @@
 
 #include <grpcpp/channel.h>
 #include <grpcpp/grpcpp.h>
-#include <algorithm>
-#include <chrono>
-#include <cstddef>
-#include <cstdint>
 #include <nlohmann/json.hpp>
 
 #include <memory>
+#include <algorithm>
+#include <chrono>
+#include <atomic>
 #include <string>
-#include <vector>
 #include <mutex>
 #include <condition_variable>
 
@@ -31,19 +29,22 @@ using message::EmailVerifyService;
 template <class RpcService>
 class RpcServiceConnPool final : public Singleton<RpcServiceConnPool<RpcService>> {
 	friend class Singleton<RpcServiceConnPool<RpcService>>;
-	using StubPtr = std::unique_ptr<typename RpcService::Stub>;
-
-	struct Connection {
-		StubPtr stub;
-		bool is_busy;
-	};
+	using ConnPtr = std::shared_ptr<typename RpcService::Stub>;
 
 public:
-	~RpcServiceConnPool() {}
+	~RpcServiceConnPool() {
+		std::lock_guard<std::mutex> lock(m_mtx);
+		m_pool.clear();
+		m_pool_size = 0;
+		m_initialized = false;
+	}
 
 	void init(const std::string& host, uint16_t port, uint32_t pool_size) {
-		if (pool_size <= 0) pool_size = 1;
+		if (pool_size <= 0) throw std::invalid_argument("pool_size must be greater than 0");
 		if (pool_size > 100) pool_size = 100;
+
+		// 防止多次初始化
+		if (m_initialized) return;
 
 		std::lock_guard<std::mutex> lock(m_mtx);
 
@@ -51,66 +52,68 @@ public:
 															   grpc::InsecureChannelCredentials());
 
 		for (int i = 0; i < pool_size; ++i) {
-			m_stubs.push_back({RpcService::NewStub(channel), false});
+			std::unique_ptr<typename RpcService::Stub> stub = RpcService::NewStub(channel);
+
+			m_pool.emplace_back(std::move(stub));
 		}
+
+		m_pool_size = pool_size;
+		m_initialized = true;
 	}
 
+	bool initialized() const { return m_initialized; }
+
 	// 返回连接池大小
-	size_t size() const { return m_stubs.size(); }
+	size_t size() const {
+		if (!m_initialized) return 0;
+
+		return m_pool.size();
+	}
 
 	// 返回空闲的 Stub 数量
 	size_t available() {
-		std::lock_guard<std::mutex> lock(m_mtx);
-		return std::count_if(m_stubs.begin(), m_stubs.end(),
-							 [](const Connection& conn) { return !conn.is_busy; });
-	}
+		if (!m_initialized) return 0;
 
-	size_t busy() {
 		std::lock_guard<std::mutex> lock(m_mtx);
-		return std::count_if(m_stubs.begin(), m_stubs.end(), [](const Connection& conn) {
-			return conn.stub == nullptr && conn.is_busy;
-		});
+
+		return m_pool.size();
 	}
 
 	// 返回空闲的 Stub
-	StubPtr get(std::chrono::seconds timeout = std::chrono::seconds{3}) {
+	ConnPtr getConnection(std::chrono::seconds timeout = std::chrono::seconds{3}) {
+		if (!initialized()) throw std::runtime_error("RpcServiceConnPool not initialized");
 		std::unique_lock<std::mutex> lock(m_mtx);
 
-		bool ok = m_cv.wait_for(lock, timeout, [this]() {
-			return std::any_of(m_stubs.begin(), m_stubs.end(),
-							   [](const Connection& conn) { return !conn.is_busy; });
-		});
-
-		if (!ok) return nullptr;
-
-		for (auto& conn : m_stubs) {
-			if (!conn.is_busy) {
-				conn.is_busy = true;
-				return std::move(conn.stub);
-			}
+		if (m_pool.empty()) {
+			m_cv.wait_for(lock, timeout, [this]() { return !m_pool.empty(); });
 		}
-		return nullptr;
+
+		if (m_pool.empty()) return nullptr;
+
+		ConnPtr stub = m_pool.front();
+		m_pool.pop_front();
+
+		return stub;
 	}
 
 	// 归还连接
-	void put(StubPtr stub) {
-		std::lock_guard<std::mutex> lock(m_mtx);
-		auto it = std::find_if(m_stubs.begin(), m_stubs.end(), [](Connection& conn) {
-			return conn.stub.get() == nullptr && conn.is_busy;
-		});
+	void releaseConnection(ConnPtr stub) {
+		if (!initialized()) throw std::runtime_error("RpcServiceConnPool not initialized");
 
-		if (it != m_stubs.end()) {
-			it->stub = std::move(stub);
-			it->is_busy = false;
-			m_cv.notify_one();
-		}
+		if (stub == nullptr) return;
+
+		std::lock_guard<std::mutex> lock(m_mtx);
+		m_pool.push_back(std::move(stub));
+		m_cv.notify_one();
 	}
 
 private:
-	std::vector<Connection> m_stubs;
+	std::deque<ConnPtr> m_pool;
+	size_t m_pool_size;
 
 	std::mutex m_mtx;
 	std::condition_variable m_cv;
+	std::atomic<bool> m_initialized{false};
 };
 
 namespace RPC {

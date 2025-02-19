@@ -4,8 +4,8 @@
 
 #include <hiredis/hiredis.h>
 #include <chrono>
+#include <atomic>
 #include <condition_variable>
-#include <cstddef>
 #include <deque>
 
 // Redis 连接
@@ -21,9 +21,13 @@ public:
 	bool get(const std::string& key, std::string& value);
 	bool del(const char* key);
 
+	// 列表 头插
 	bool LPush(const std::string& key, const std::string& value);
+	// 列表 头删
 	bool LPop(const std::string& key, std::string& value);
+	// 列表 尾插
 	bool RPush(const std::string& key, const std::string& value);
+	// 列表 尾删
 	bool RPop(const std::string& key, std::string& value);
 
 	bool HSet(const std::string& key, const std::string& field, const std::string& value);
@@ -40,6 +44,7 @@ private:
 };
 
 using RedisConnPtr = std::shared_ptr<RedisConnection>;
+
 // Redis 连接池
 class RedisConnPool : public Singleton<RedisConnPool> {
 	friend class Singleton<RedisConnPool>;
@@ -49,14 +54,18 @@ public:
 
 	void init(const std::string& ip, uint16_t port, uint32_t pool_size);
 
+	bool initialized() const;
+
 	// 获取连接
 	RedisConnPtr getConnection(std::chrono::seconds timeout = std::chrono::seconds(3));
 
 	// 归还连接
 	void releaseConnection(RedisConnPtr conn);
 
-	size_t available();
+	// 连接池剩余连接数
+	size_t available() const;
 
+	// 连接池大小
 	size_t size() const;
 
 private:
@@ -64,6 +73,9 @@ private:
 
 	uint32_t m_pool_size;
 
-	std::mutex m_mtx;
+	mutable std::mutex m_mtx;
 	std::condition_variable m_cv;
+
+	// 连接池是否初始化
+	std::atomic<bool> m_initialized = false;
 };

@@ -1,6 +1,5 @@
-#include "RedisConnPool.h"
+#include "pool/RedisConnPool.h"
 #include <gtest/gtest.h>
-#include <cstddef>
 #include <iostream>
 #include <thread>
 #include <vector>
