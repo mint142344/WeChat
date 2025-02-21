@@ -187,7 +187,8 @@ bool LogicSystem::handleRequest(const std::string& route, const HttpRequest& req
 	return false;
 }
 
-void LogicSystem::registerRoute(const std::string& route, http::verb method, RouteHandler handler) {
+void LogicSystem::registerRoute(const std::string& route, http::verb method,
+								const RouteHandler& handler) {
 	switch (method) {
 		case http::verb::get:
 			m_get_handlers.insert({route, handler});

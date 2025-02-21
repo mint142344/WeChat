@@ -17,6 +17,13 @@ class MysqlConnPool : public Singleton<MysqlConnPool> {
 	friend class Singleton<MysqlConnPool>;
 
 public:
+	MysqlConnPool() = default;
+
+	MysqlConnPool(const MysqlConnPool&) = delete;
+	MysqlConnPool(MysqlConnPool&&) = delete;
+	MysqlConnPool& operator=(const MysqlConnPool&) = delete;
+	MysqlConnPool& operator=(MysqlConnPool&&) = delete;
+
 	~MysqlConnPool();
 
 	void init(const std::string& host, uint16_t port, const std::string& user,
@@ -32,7 +39,7 @@ public:
 	MysqlConnPtr getConnection(std::chrono::seconds timeout = std::chrono::seconds(3));
 
 	// 归还连接
-	void releaseConnection(MysqlConnPtr conn);
+	void releaseConnection(const MysqlConnPtr& conn);
 
 	// 连接池大小
 	size_t size() const;

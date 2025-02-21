@@ -1,4 +1,4 @@
-# Find required packages
+# 查找库
 find_package(Boost CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(Protobuf CONFIG REQUIRED)
@@ -6,6 +6,7 @@ find_package(gRPC CONFIG REQUIRED)
 find_package(fmt REQUIRED)
 find_package(GTest REQUIRED)
 find_library(HIREDIS_LIB hiredis)
+find_library(LIB_MYSQL_CONNECTOR_CPP NAMES mysqlcppconn PATHS ${LIB_MYSQL_CONNECTOR_DIR} REQUIRED)
 
 file(GLOB_RECURSE SOURCES src/*.cpp)
 file(GLOB_RECURSE PROTO_GEN_SOURCES gen/*.cc)
@@ -55,3 +56,17 @@ target_link_libraries(test_redis_pool PRIVATE
     fmt::fmt
     ${HIREDIS_LIB}
 )
+
+# 测试 mysql 连接池
+add_executable(test_mysql_pool
+    test_mysql_pool.cpp
+    ../src/pool/MysqlConnPool.cpp
+)
+add_test(NAME test_mysql_pool COMMAND test_mysql_pool)
+target_link_libraries(test_mysql_pool PRIVATE
+    GTest::GTest
+    GTest::Main
+    fmt::fmt
+    ${LIB_MYSQL_CONNECTOR_CPP}
+)
+target_include_directories(test_mysql_pool PRIVATE ${LIB_MYSQL_CONNECTOR_INLCUDE})

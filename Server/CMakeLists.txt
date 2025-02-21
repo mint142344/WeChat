@@ -2,14 +2,10 @@ cmake_minimum_required(VERSION 3.20)
 
 project(WeChat-Server)
 
-# 启动测试
-enable_testing()
-add_subdirectory(test)
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Find required packages
+# 查找库
 find_package(Boost CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(Protobuf CONFIG REQUIRED)
@@ -21,6 +17,10 @@ find_library(HIREDIS_LIB hiredis)
 set(LIB_MYSQL_CONNECTOR_INLCUDE /usr/local/mysql/connector-c++-8.0.33/include)
 set(LIB_MYSQL_CONNECTOR_DIR /usr/local/mysql/connector-c++-8.0.33/lib64/debug)
 find_library(LIB_MYSQL_CONNECTOR_CPP NAMES mysqlcppconn PATHS ${LIB_MYSQL_CONNECTOR_DIR} REQUIRED)
+
+# 启动测试
+enable_testing()
+add_subdirectory(test)
 
 file(GLOB_RECURSE SOURCES src/*.cpp)
 file(GLOB_RECURSE PROTO_GEN_SOURCES gen/*.cc)

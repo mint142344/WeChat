@@ -6,10 +6,10 @@
 
 #include <grpcpp/channel.h>
 #include <grpcpp/grpcpp.h>
+#include <algorithm>
 #include <nlohmann/json.hpp>
 
 #include <memory>
-#include <algorithm>
 #include <chrono>
 #include <atomic>
 #include <string>
@@ -31,7 +31,15 @@ class RpcServiceConnPool final : public Singleton<RpcServiceConnPool<RpcService>
 	friend class Singleton<RpcServiceConnPool<RpcService>>;
 	using ConnPtr = std::shared_ptr<typename RpcService::Stub>;
 
+	constexpr static uint32_t MAX_POOL_SIZE = 100;
+
 public:
+	RpcServiceConnPool() = default;
+	RpcServiceConnPool(const RpcServiceConnPool&) = delete;
+	RpcServiceConnPool(RpcServiceConnPool&&) = delete;
+	RpcServiceConnPool& operator=(const RpcServiceConnPool&) = delete;
+	RpcServiceConnPool& operator=(RpcServiceConnPool&&) = delete;
+
 	~RpcServiceConnPool() {
 		std::lock_guard<std::mutex> lock(m_mtx);
 		m_pool.clear();
@@ -41,7 +49,8 @@ public:
 
 	void init(const std::string& host, uint16_t port, uint32_t pool_size) {
 		if (pool_size <= 0) throw std::invalid_argument("pool_size must be greater than 0");
-		if (pool_size > 100) pool_size = 100;
+
+		pool_size = std::min<uint32_t>(pool_size, MAX_POOL_SIZE);
 
 		// 防止多次初始化
 		if (m_initialized) return;
@@ -109,7 +118,7 @@ public:
 
 private:
 	std::deque<ConnPtr> m_pool;
-	size_t m_pool_size;
+	size_t m_pool_size = 0;
 
 	std::mutex m_mtx;
 	std::condition_variable m_cv;

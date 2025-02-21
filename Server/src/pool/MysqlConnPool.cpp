@@ -5,6 +5,7 @@
 #include <jdbc/mysql_driver.h>
 #include <fmt/format.h>
 
+#include <algorithm>
 #include <mutex>
 #include <string>
 
@@ -53,13 +54,9 @@ bool MysqlConnPool::checkHealth() {
 
 	std::lock_guard<std::mutex> lock(m_mtx);
 
-	for (auto& conn : m_pool) {
-		if (!conn->isValid() || conn->isClosed()) {
-			return false;
-		}
-	}
-
-	return true;
+	return std::all_of(m_pool.begin(), m_pool.end(), [](const MysqlConnPtr& conn) {
+		return conn->isValid() && !conn->isClosed();
+	});
 }
 
 MysqlConnPtr MysqlConnPool::getConnection(std::chrono::seconds timeout) {
@@ -91,7 +88,7 @@ MysqlConnPtr MysqlConnPool::getConnection(std::chrono::seconds timeout) {
 	return conn;
 }
 
-void MysqlConnPool::releaseConnection(MysqlConnPtr conn) {
+void MysqlConnPool::releaseConnection(const MysqlConnPtr& conn) {
 	if (!initialized()) throw std::runtime_error("MysqlConnPool not initialized");
 
 	std::lock_guard<std::mutex> lock(m_mtx);

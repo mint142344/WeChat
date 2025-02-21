@@ -11,10 +11,14 @@
 // Redis 连接
 class RedisConnection {
 public:
-	RedisConnection(redisContext* context = nullptr);
+	RedisConnection(redisContext* context);
+	RedisConnection(const RedisConnection&) = delete;
+	RedisConnection(RedisConnection&&) = delete;
+	RedisConnection& operator=(const RedisConnection&) = delete;
+	RedisConnection& operator=(RedisConnection&&) = delete;
+
 	~RedisConnection();
 
-public:
 	bool auth(const std::string& password);
 
 	bool set(const std::string& key, const std::string& value);
@@ -40,7 +44,7 @@ public:
 	bool expire(const std::string& key, int seconds);
 
 private:
-	redisContext* m_context;
+	redisContext* m_context = nullptr;
 };
 
 using RedisConnPtr = std::shared_ptr<RedisConnection>;
@@ -50,6 +54,11 @@ class RedisConnPool : public Singleton<RedisConnPool> {
 	friend class Singleton<RedisConnPool>;
 
 public:
+	RedisConnPool() = default;
+	RedisConnPool(const RedisConnPool&) = delete;
+	RedisConnPool(RedisConnPool&&) = delete;
+	RedisConnPool& operator=(const RedisConnPool&) = delete;
+	RedisConnPool& operator=(RedisConnPool&&) = delete;
 	~RedisConnPool();
 
 	void init(const std::string& ip, uint16_t port, uint32_t pool_size);
@@ -71,7 +80,7 @@ public:
 private:
 	std::deque<RedisConnPtr> m_connections;
 
-	uint32_t m_pool_size;
+	uint32_t m_pool_size = 0;
 
 	mutable std::mutex m_mtx;
 	std::condition_variable m_cv;

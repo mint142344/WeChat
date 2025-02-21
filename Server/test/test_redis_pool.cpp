@@ -131,6 +131,7 @@ TEST_F(RedisConnPoolTest, ConcurrentOperationsTest) {
 	};
 
 	std::vector<std::thread> threads;
+	threads.reserve(THREAD_COUNT);
 	for (int i = 0; i < THREAD_COUNT; ++i) {
 		threads.emplace_back(worker, i);
 	}

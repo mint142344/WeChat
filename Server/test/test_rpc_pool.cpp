@@ -10,7 +10,7 @@ protected:
 	// SetUp 方法在每个测试用例运行之前自动调用，用于进行测试前的初始化工作。
 	void SetUp() override {
 		// Initialize pool with test configuration
-		std::cout << "RpcPoolTest::SetUp" << std::endl;
+		std::cout << "RpcPoolTest::SetUp" << '\n';
 		RpcServiceConnPool<EmailVerifyService>::getInstance()->init("localhost", 5001, 4);
 	}
 
@@ -50,6 +50,7 @@ TEST_F(RpcPoolTest, ConcurrentAccess) {
 	constexpr int NUM_THREADS = 100;
 	std::vector<std::thread> threads;
 
+	threads.reserve(NUM_THREADS);
 	for (int i = 0; i < NUM_THREADS; ++i) {
 		threads.emplace_back([]() {
 			// 3s的超时等待
