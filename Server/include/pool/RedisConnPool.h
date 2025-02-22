@@ -88,3 +88,26 @@ private:
 	// 连接池是否初始化
 	std::atomic<bool> m_initialized = false;
 };
+
+// Redis 连接 RAII 封装
+struct RedisConnGuard {
+	explicit RedisConnGuard(RedisConnPtr conn) : m_conn(std::move(conn)) {}
+
+	~RedisConnGuard() {
+		if (m_conn) {
+			RedisConnPool::getInstance()->releaseConnection(m_conn);
+		}
+	}
+
+	RedisConnGuard& operator=(RedisConnGuard&&) = default;
+	RedisConnGuard(const RedisConnGuard&) = delete;
+	RedisConnGuard(RedisConnGuard&&) = default;
+	RedisConnGuard& operator=(const RedisConnGuard&) = default;
+
+	RedisConnPtr get() const { return m_conn; }
+
+	RedisConnection* operator->() const { return m_conn.get(); }
+
+private:
+	RedisConnPtr m_conn;
+};

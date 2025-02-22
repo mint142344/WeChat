@@ -1,18 +1,22 @@
 #pragma once
 #include <jdbc/mysql_connection.h>
 #include <jdbc/mysql_driver.h>
+#include <jdbc/cppconn/resultset.h>
 
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
-#include <cstddef>
 #include <deque>
 #include <mutex>
 
 #include "Singleton.hpp"
 
 using MysqlConnPtr = std::shared_ptr<sql::Connection>;
+using StmtPtr = std::unique_ptr<sql::Statement>;
+using PstmtPtr = std::unique_ptr<sql::PreparedStatement>;
+using ResPtr = std::unique_ptr<sql::ResultSet>;
 
+// MySQL 连接池
 class MysqlConnPool : public Singleton<MysqlConnPool> {
 	friend class Singleton<MysqlConnPool>;
 
@@ -26,6 +30,7 @@ public:
 
 	~MysqlConnPool();
 
+	// 初始化所有连接，并设置默认数据库
 	void init(const std::string& host, uint16_t port, const std::string& user,
 			  const std::string& password, const std::string& database, uint32_t pool_size);
 
@@ -56,4 +61,27 @@ private:
 	// 标记连接池是否已经初始化
 	std::atomic<bool> m_initialized = false;
 	size_t m_pool_size = 0;
+};
+
+// MySQL 连接 RAII 封装
+struct MysqlConnGuard {
+	explicit MysqlConnGuard(MysqlConnPtr conn) : m_conn(std::move(conn)) {}
+	~MysqlConnGuard() {
+		if (m_conn) {
+			MysqlConnPool::getInstance()->releaseConnection(m_conn);
+		}
+	}
+
+	MysqlConnGuard(const MysqlConnGuard&) = delete;
+	MysqlConnGuard(MysqlConnGuard&&) = delete;
+	MysqlConnGuard& operator=(const MysqlConnGuard&) = default;
+	MysqlConnGuard& operator=(MysqlConnGuard&&) = default;
+
+	// 获取原始连接
+	MysqlConnPtr get() const { return m_conn; }
+
+	sql::Connection* operator->() const { return m_conn.get(); }
+
+private:
+	MysqlConnPtr m_conn;
 };

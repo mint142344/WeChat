@@ -35,6 +35,7 @@ void MysqlConnPool::init(const std::string& host, uint16_t port, const std::stri
 			if (conn == nullptr) {
 				throw std::runtime_error("Failed to connect to database");
 			}
+			// 设置默认数据库
 			conn->setSchema(database);
 
 			m_pool.emplace_back(conn);

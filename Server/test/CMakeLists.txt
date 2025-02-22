@@ -1,23 +1,12 @@
 # 查找库
-find_package(Boost CONFIG REQUIRED)
-find_package(nlohmann_json CONFIG REQUIRED)
-find_package(Protobuf CONFIG REQUIRED)
-find_package(gRPC CONFIG REQUIRED)
-find_package(fmt REQUIRED)
 find_package(GTest REQUIRED)
-find_library(HIREDIS_LIB hiredis)
-find_library(LIB_MYSQL_CONNECTOR_CPP NAMES mysqlcppconn PATHS ${LIB_MYSQL_CONNECTOR_DIR} REQUIRED)
-
-file(GLOB_RECURSE SOURCES src/*.cpp)
-file(GLOB_RECURSE PROTO_GEN_SOURCES gen/*.cc)
 
 include_directories(../include ../gen)
 
-file(GLOB PROTO_FILES ../gen/*.cc)
-
 # 测试 grpc 连接池
 add_executable(test_rpc_pool
-    test_rpc_pool.cpp ${PROTO_FILES}
+    test_rpc_pool.cpp
+    ${PROTO_GEN_SOURCES}
     ../src/pool/RpcConnPool.cpp
 )
 add_test(NAME test_rpc_pool COMMAND test_rpc_pool)
@@ -70,3 +59,20 @@ target_link_libraries(test_mysql_pool PRIVATE
     ${LIB_MYSQL_CONNECTOR_CPP}
 )
 target_include_directories(test_mysql_pool PRIVATE ${LIB_MYSQL_CONNECTOR_INLCUDE})
+
+# 测试 mysql user dao
+add_executable(test_user_dao
+    test_user_dao.cpp
+    ../src/pool/MysqlConnPool.cpp
+    ../src/DAO/mysql/MysqlUserDao.cpp
+    ../include/DAO/mysql/MysqlUserDao.h
+    ../include/DAO/user.h
+)
+add_test(NAME test_user_dao COMMAND test_user_dao)
+target_link_libraries(test_user_dao PRIVATE
+    GTest::GTest GTest::Main
+    fmt::fmt
+    OpenSSL::SSL OpenSSL::Crypto
+    ${LIB_MYSQL_CONNECTOR_CPP}
+)
+target_include_directories(test_user_dao PRIVATE ${LIB_MYSQL_CONNECTOR_INLCUDE})

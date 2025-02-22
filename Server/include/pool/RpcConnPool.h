@@ -29,7 +29,8 @@ using message::EmailVerifyService;
 template <class RpcService>
 class RpcServiceConnPool final : public Singleton<RpcServiceConnPool<RpcService>> {
 	friend class Singleton<RpcServiceConnPool<RpcService>>;
-	using ConnPtr = std::shared_ptr<typename RpcService::Stub>;
+
+	using StubPtr = std::shared_ptr<typename RpcService::Stub>;
 
 	constexpr static uint32_t MAX_POOL_SIZE = 100;
 
@@ -89,7 +90,7 @@ public:
 	}
 
 	// 返回空闲的 Stub
-	ConnPtr getConnection(std::chrono::seconds timeout = std::chrono::seconds{3}) {
+	StubPtr getConnection(std::chrono::seconds timeout = std::chrono::seconds{3}) {
 		if (!initialized()) throw std::runtime_error("RpcServiceConnPool not initialized");
 		std::unique_lock<std::mutex> lock(m_mtx);
 
@@ -99,14 +100,14 @@ public:
 
 		if (m_pool.empty()) return nullptr;
 
-		ConnPtr stub = m_pool.front();
+		StubPtr stub = m_pool.front();
 		m_pool.pop_front();
 
 		return stub;
 	}
 
 	// 归还连接
-	void releaseConnection(ConnPtr stub) {
+	void releaseConnection(StubPtr stub) {
 		if (!initialized()) throw std::runtime_error("RpcServiceConnPool not initialized");
 
 		if (stub == nullptr) return;
@@ -117,12 +118,37 @@ public:
 	}
 
 private:
-	std::deque<ConnPtr> m_pool;
+	std::deque<StubPtr> m_pool;
 	size_t m_pool_size = 0;
 
 	std::mutex m_mtx;
 	std::condition_variable m_cv;
 	std::atomic<bool> m_initialized{false};
+};
+
+// RAII Stub 封装
+template <class RpcService>
+struct StubGuard {
+public:
+	explicit StubGuard(std::shared_ptr<typename RpcService::Stub> stub) : stub(std::move(stub)) {}
+
+	~StubGuard() {
+		if (stub) {
+			RpcServiceConnPool<RpcService>::getInstance()->releaseConnection(std::move(stub));
+		}
+	}
+
+	StubGuard(const StubGuard&) = delete;
+	StubGuard& operator=(const StubGuard&) = delete;
+	StubGuard(StubGuard&&) = default;
+	StubGuard& operator=(StubGuard&&) = default;
+
+	std::shared_ptr<typename RpcService::Stub> get() const { return stub; }
+
+	typename RpcService::Stub* operator->() const { return stub.get(); }
+
+private:
+	std::shared_ptr<typename RpcService::Stub> stub;
 };
 
 namespace RPC {

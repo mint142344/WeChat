@@ -1,6 +1,7 @@
 #include "pool/RpcConnPool.h"
 #include <fmt/base.h>
 #include <grpcpp/support/status.h>
+#include "message.grpc.pb.h"
 
 json RPC::getEmailVerifyCode(const std::string& email) {
 	// 取出一个空闲的 Stub
@@ -11,13 +12,7 @@ json RPC::getEmailVerifyCode(const std::string& email) {
 	}
 
 	// RAII 归还 Stub
-	struct StubGuard {
-		std::shared_ptr<EmailVerifyService::Stub> stub;
-		~StubGuard() {
-			RpcServiceConnPool<EmailVerifyService>::getInstance()->releaseConnection(
-				std::move(stub));
-		}
-	} guard{std::move(stub)};
+	StubGuard<EmailVerifyService> guard(stub);
 
 	EmailVerifyResponse response;
 	ClientContext context;
@@ -26,7 +21,7 @@ json RPC::getEmailVerifyCode(const std::string& email) {
 	EmailVerifyRequest request;
 	request.set_email(email);
 
-	Status status = guard.stub->getEmailVerifyCode(&context, request, &response);
+	Status status = guard->getEmailVerifyCode(&context, request, &response);
 
 	if (!status.ok()) {
 		if (status.error_code() == grpc::StatusCode::DEADLINE_EXCEEDED) {
