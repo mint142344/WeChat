@@ -60,16 +60,14 @@ void LoginDialog::on_button_login_clicked() {
 	if (ui->comboBox_username->currentText().isEmpty()) {
 		setErrorHint(true, "用户名不能为空");
 		return;
-	} else {
-		setErrorHint(false, "");
 	}
+	setErrorHint(false, "");
 
 	if (ui->lineEdit_password->text().isEmpty()) {
 		setErrorHint(true, "密码不能为空");
 		return;
-	} else {
-		setErrorHint(false, "");
 	}
+	setErrorHint(false, "");
 
 	QJsonObject json;
 	json["username"] = ui->comboBox_username->currentText();
@@ -77,7 +75,7 @@ void LoginDialog::on_button_login_clicked() {
 
 	HttpManager::getInstance()->post("/login", json, ModuleType::LOGIN, RequestType::LOGIN);
 
-	qDebug() << "LoginDialog::on_button_login_clicked";
+	// qDebug() << "LoginDialog::on_button_login_clicked";
 }
 
 void LoginDialog::initUi() {
@@ -85,10 +83,11 @@ void LoginDialog::initUi() {
 	ui->comboBox_username->setLineEdit(new PasswdLineEdit(this));
 	PasswdLineEdit* passwdLineEdit =
 		qobject_cast<PasswdLineEdit*>(ui->comboBox_username->lineEdit());
-	if (passwdLineEdit) {
+	if (passwdLineEdit != nullptr) {
 		passwdLineEdit->setLeadingIcon(":/images/user.png", ":/images/user-focus.png");
 		passwdLineEdit->setAttachment(false, true);
 		passwdLineEdit->setPlaceholderText("请输入用户名");
+		passwdLineEdit->setFont(QFont("Microsoft YaHei", 11));
 	}
 
 	// 密码 leading action
@@ -98,6 +97,7 @@ void LoginDialog::initUi() {
 	ui->lineEdit_password->setInvisbleIcon(":/images/passwd-invisible.png",
 										   ":/images/passwd-invisible-hover.png");
 	ui->lineEdit_password->setAttachment(true, true);
+	ui->lineEdit_password->setFont(QFont("Microsoft YaHei", 11));
 
 	ui->comboBox_username->setFocus();
 }

@@ -82,43 +82,38 @@ bool ForgetDialog::checkAllInput() {
 	if (ui->lineEdit_username->text().isEmpty()) {
 		setErrorHint(true, "用户名不能为空");
 		return false;
-	} else {
-		setErrorHint(false, "");
 	}
+	setErrorHint(false, "");
 
 	// 2.email
 	bool isvalid = emailRegex.match(ui->lineEdit_email->text()).hasMatch();
 	if (!isvalid) {
 		setErrorHint(true, "邮箱格式不正确");
 		return false;
-	} else {
-		setErrorHint(false, "");
 	}
+	setErrorHint(false, "");
 
 	// 3.verify code
 	if (ui->lineEdit_verify_code->text().isEmpty()) {
 		setErrorHint(true, "验证码不能为空");
 		return false;
-	} else {
-		setErrorHint(false, "");
 	}
+	setErrorHint(false, "");
 
 	// 4.new passwd
 	isvalid = passwordRegex.match(ui->lineEdit_password->text()).hasMatch();
 	if (!isvalid) {
 		setErrorHint(true, "密码至少6位");
 		return false;
-	} else {
-		setErrorHint(false, "");
 	}
+	setErrorHint(false, "");
 
 	// 5.confirm passwd
 	if (ui->lineEdit_password->text() != ui->lineEdit_confirm_password->text()) {
 		setErrorHint(true, "两次密码不一致");
 		return false;
-	} else {
-		setErrorHint(false, "");
 	}
+	setErrorHint(false, "");
 
 	return true;
 }
@@ -133,7 +128,7 @@ void ForgetDialog::handle_http_response(RequestType request_type, const QJsonObj
 }
 
 void ForgetDialog::on_button_confirm_clicked() {
-	qDebug() << "ForgetDialog::on_button_confirm_clicked";
+	// qDebug() << "ForgetDialog::on_button_confirm_clicked";
 
 	if (!checkAllInput()) {
 		return;
@@ -151,7 +146,7 @@ void ForgetDialog::on_button_confirm_clicked() {
 }
 
 void ForgetDialog::on_button_get_code_clicked() {
-	qDebug() << "ForgetDialog::on_button_get_code_clicked";
+	// qDebug() << "ForgetDialog::on_button_get_code_clicked";
 
 	QString email = ui->lineEdit_email->text();
 	if (emailRegex.match(email).hasMatch()) {

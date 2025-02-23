@@ -1,4 +1,5 @@
 #include "HttpManager.h"
+#include <qnetworkreply.h>
 
 #include <QJsonObject>
 #include <QJsonDocument>
@@ -75,8 +76,10 @@ void HttpManager::post(const QString& route, const QJsonObject& json, ModuleType
 				case QNetworkReply::InternalServerError:
 					obj["message"] = "服务器内部错误";
 					break;
+				case QNetworkReply::ContentConflictError:
+					break;
 				default:
-					obj["message"] = reply->errorString();
+					obj["message"] = "网络连接异常";
 					break;
 			}
 		}

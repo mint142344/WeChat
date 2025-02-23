@@ -41,46 +41,40 @@ bool RegisterDialog::checkAllInput() {
 	if (ui->lineEdit_username->text().isEmpty()) {
 		setErrorHint(true, "用户名不能为空");
 		return false;
-	} else {
-		setErrorHint(false, "");
 	}
+	setErrorHint(false, "");
 
 	bool isvalid = emailRegex.match(ui->lineEdit_email->text()).hasMatch();
 	if (!isvalid) {
 		setErrorHint(true, "邮箱格式不正确");
 		return false;
-	} else {
-		setErrorHint(false, "");
 	}
+	setErrorHint(false, "");
 
 	if (ui->lineEdit_password->text().isEmpty()) {
 		setErrorHint(true, "密码不能为空");
 		return false;
-	} else {
-		setErrorHint(false, "");
 	}
+	setErrorHint(false, "");
 
 	if (ui->lineEdit_password->text() != ui->lineEdit_confirmPassword->text()) {
 		setErrorHint(true, "两次密码不一致");
 		return false;
-	} else {
-		setErrorHint(false, "");
 	}
+	setErrorHint(false, "");
 
 	isvalid = passwordRegex.match(ui->lineEdit_password->text()).hasMatch();
 	if (!isvalid) {
 		setErrorHint(true, "密码至少6位");
 		return false;
-	} else {
-		setErrorHint(false, "");
 	}
+	setErrorHint(false, "");
 
 	if (ui->lineEdit_verificationCode->text().isEmpty()) {
 		setErrorHint(true, "验证码不能为空");
 		return false;
-	} else {
-		setErrorHint(false, "");
 	}
+	setErrorHint(false, "");
 
 	return true;
 }
@@ -151,28 +145,28 @@ void RegisterDialog::handle_http_response(RequestType request_type, const QJsonO
 void RegisterDialog::registerAllCallback() {
 	m_request_map.insert(RequestType::NEW_USER, [this](const QJsonObject& json) {
 		// 注册结果
-		qDebug() << "registerAllCallback" << __LINE__ << json;
+		// qDebug() << "registerAllCallback" << __LINE__ << json;
+
 		if (json["status"].toString() == "error") {
 			setErrorHint(true, "注册失败");
 			QMessageBox::warning(this, "注册失败", json["message"].toString());
 			return;
-		} else {
-			setErrorHint(false, "注册成功");
-			QMessageBox::information(this, "注册成功", "点击返回登录");
-			accept();
 		}
+		setErrorHint(false, "注册成功");
+		QMessageBox::information(this, "注册成功", "点击返回登录");
+		accept();
 	});
 
 	m_request_map.insert(RequestType::GET_VERIFICATION_CODE, [this](const QJsonObject& json) {
 		// 验证码发送结果
-		qDebug() << "registerAllCallback" << __LINE__ << json;
+		// qDebug() << "registerAllCallback" << __LINE__ << json;
+
 		if (json["status"].toString() == "error") {
 			setErrorHint(true, json["message"].toString());
 			ui->button_get_code->stopTimer();
 			return;
-		} else {
-			setErrorHint(false, "验证码已发送到邮箱");
 		}
+		setErrorHint(false, "验证码已发送到邮箱");
 	});
 }
 
@@ -186,9 +180,8 @@ void RegisterDialog::on_button_get_code_clicked() {
 	if (!isvalid) {
 		setErrorHint(true, "邮箱格式不正确");
 		return;
-	} else {
-		setErrorHint(false, "");
 	}
+	setErrorHint(false, "");
 
 	QJsonObject json;
 	json["email"] = email;

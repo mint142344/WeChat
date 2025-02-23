@@ -37,7 +37,7 @@ private:
 	void initLeadingAction();
 
 private:
-	QPushButton* m_toggle_button;
+	QPushButton* m_toggle_button = nullptr;
 	QAction* m_leading_action = nullptr;
 
 	bool m_visible = false;

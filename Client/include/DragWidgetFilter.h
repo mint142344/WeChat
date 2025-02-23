@@ -12,6 +12,6 @@ protected:
 	bool eventFilter(QObject* watched, QEvent* event) override;
 
 private:
-	bool m_mouse_press;
+	bool m_mouse_press = false;
 	QPointF m_last_pos;
 };
