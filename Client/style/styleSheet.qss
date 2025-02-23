@@ -9,7 +9,7 @@ QLabel#label_avatar {
 
 /* 无边框后设置圆角 */
 QDialog#LoginDialog .QFrame {
-    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #6c4867, stop: 1 #543959);
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #30cfd0, stop:1 #330867);
     border-radius: 8px;
 }
 
@@ -40,6 +40,10 @@ QPushButton#pushButton_login:hover {
 }
 
 /***************************** Register Dialog *****************************/
+QDialog#RegisterDialog {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #09203f stop:1 #537895);
+    border-radius: 8px;
+}
 QLabel#label_errorhint[error=true] {
     color: #ff4d4f;
     font-size: 12px;
@@ -48,4 +52,9 @@ QLabel#label_errorhint[error=true] {
 QLabel#label_errorhint[error=false] {
     color: #67c23a;
     font-size: 12px;
+}
+/***************************** Forget Password Dialog *****************************/
+QDialog#ForgetDialog {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #2b5876 stop:1 #4e4376);
+    border-radius: 8px;
 }

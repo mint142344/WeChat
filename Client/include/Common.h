@@ -4,6 +4,7 @@ enum class RequestType {
 	GET_VERIFICATION_CODE, // 获取验证码
 	NEW_USER,			   // 注册
 	FORGET_PASSWORD,	   // 忘记密码
+	LOGIN,				   // 登录
 };
 
 enum class ModuleType {

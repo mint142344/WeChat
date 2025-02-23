@@ -1,4 +1,6 @@
 #include "LoginDialog.h"
+#include "Common.h"
+#include "HttpManager.h"
 #include "ui_LoginDialog.h"
 #include "ForgetDialog.h"
 #include "RegisterDialog.h"
@@ -8,6 +10,7 @@
 #include <QGraphicsDropShadowEffect>
 #include <QIcon>
 #include <QAction>
+#include <QJsonObject>
 
 #include <memory>
 
@@ -36,6 +39,19 @@ LoginDialog::LoginDialog(QWidget* parent) : QDialog(parent), ui(new Ui::LoginDia
 		std::unique_ptr<ForgetDialog> forgetDialog = std::make_unique<ForgetDialog>(this);
 		forgetDialog->exec();
 	});
+
+	// 登录请求回调
+	connect(HttpManager::getInstance(), &HttpManager::sig_module_login_finished,
+			[this](RequestType type, const QJsonObject& json) {
+				if (json["status"].toString() == "ok") {
+					// 登录成功
+					qDebug() << "登录成功";
+					accept();
+				} else {
+					// 登录失败
+					setErrorHint(true, json["message"].toString());
+				}
+			});
 }
 
 LoginDialog::~LoginDialog() { delete ui; }
@@ -54,6 +70,12 @@ void LoginDialog::on_button_login_clicked() {
 	} else {
 		setErrorHint(false, "");
 	}
+
+	QJsonObject json;
+	json["username"] = ui->comboBox_username->currentText();
+	json["password"] = ui->lineEdit_password->text();
+
+	HttpManager::getInstance()->post("/login", json, ModuleType::LOGIN, RequestType::LOGIN);
 
 	qDebug() << "LoginDialog::on_button_login_clicked";
 }
