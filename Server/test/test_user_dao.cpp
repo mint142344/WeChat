@@ -1,3 +1,4 @@
+#include "DAO/ErrorCode.h"
 #include "pool/MysqlConnPool.h"
 #include "DAO/user.h"
 #include "DAO/mysql/MysqlUserDao.h"
@@ -39,7 +40,7 @@ protected:
 // 测试添加用户
 TEST_F(MysqlUserDaoTest, AddUser) {
 	auto user = createTestUser();
-	EXPECT_TRUE(dao->addUser(user));
+	EXPECT_EQ(dao->addUser(user), ErrorCode::OK);
 
 	// 验证用户已添加
 	auto result = dao->queryByUsername(user.username);
@@ -51,8 +52,9 @@ TEST_F(MysqlUserDaoTest, AddUser) {
 // 测试添加重复用户
 TEST_F(MysqlUserDaoTest, AddDuplicateUser) {
 	auto user = createTestUser();
-	EXPECT_TRUE(dao->addUser(user));
-	EXPECT_FALSE(dao->addUser(user)); // 添加重复用户应该失败
+	EXPECT_EQ(dao->addUser(user), ErrorCode::OK);
+	// 添加重复用户应该失败
+	EXPECT_NE(dao->addUser(user), ErrorCode::OK);
 }
 
 // 测试查询不存在的用户
@@ -68,8 +70,8 @@ TEST_F(MysqlUserDaoTest, QueryByEmail) {
 	user2.username = "test_user2";
 	user2.email = user1.email; // 相同的邮箱
 
-	EXPECT_TRUE(dao->addUser(user1));
-	EXPECT_TRUE(dao->addUser(user2));
+	EXPECT_EQ(dao->addUser(user1), ErrorCode::OK);
+	EXPECT_EQ(dao->addUser(user2), ErrorCode::OK);
 
 	auto results = dao->queryByEmail(user1.email);
 	EXPECT_EQ(results.size(), 2);
@@ -78,9 +80,9 @@ TEST_F(MysqlUserDaoTest, QueryByEmail) {
 // 测试修改密码
 TEST_F(MysqlUserDaoTest, ModifyPassword) {
 	auto user = createTestUser();
-	EXPECT_TRUE(dao->addUser(user));
+	EXPECT_EQ(dao->addUser(user), ErrorCode::OK);
 
-	EXPECT_TRUE(dao->modifyPasswd(user.username, "new_password"));
+	EXPECT_EQ(dao->modifyPasswd(user.username, "new_password"), ErrorCode::OK);
 
 	auto result = dao->queryByUsername(user.username);
 	ASSERT_TRUE(result.has_value());
@@ -90,10 +92,10 @@ TEST_F(MysqlUserDaoTest, ModifyPassword) {
 // 测试修改头像
 TEST_F(MysqlUserDaoTest, ModifyAvatar) {
 	auto user = createTestUser();
-	EXPECT_TRUE(dao->addUser(user));
+	EXPECT_EQ(dao->addUser(user), ErrorCode::OK);
 
 	std::string newAvatar = "http://example.com/new_avatar";
-	EXPECT_TRUE(dao->modifyAvatar(user.username, newAvatar));
+	EXPECT_EQ(dao->modifyAvatar(user.username, newAvatar), ErrorCode::OK);
 
 	auto result = dao->queryByUsername(user.username);
 	ASSERT_TRUE(result.has_value());
@@ -103,10 +105,10 @@ TEST_F(MysqlUserDaoTest, ModifyAvatar) {
 // 测试修改邮箱
 TEST_F(MysqlUserDaoTest, ModifyEmail) {
 	auto user = createTestUser();
-	EXPECT_TRUE(dao->addUser(user));
+	EXPECT_EQ(dao->addUser(user), ErrorCode::OK);
 
 	std::string newEmail = "new_test@example.com";
-	EXPECT_TRUE(dao->modifyEmail(user.username, newEmail));
+	EXPECT_EQ(dao->modifyEmail(user.username, newEmail), ErrorCode::OK);
 
 	auto result = dao->queryByUsername(user.username);
 	ASSERT_TRUE(result.has_value());
@@ -116,12 +118,12 @@ TEST_F(MysqlUserDaoTest, ModifyEmail) {
 // 测试删除用户
 TEST_F(MysqlUserDaoTest, DeleteUser) {
 	auto user = createTestUser();
-	EXPECT_TRUE(dao->addUser(user));
+	EXPECT_EQ(dao->addUser(user), ErrorCode::OK);
 
 	auto result = dao->queryByUsername(user.username);
 	ASSERT_TRUE(result.has_value());
 
-	EXPECT_TRUE(dao->deleteUser(result->id));
+	EXPECT_EQ(dao->deleteUser(result->id), ErrorCode::OK);
 
 	result = dao->queryByUsername(user.username);
 	EXPECT_FALSE(result.has_value());
