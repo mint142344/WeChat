@@ -33,5 +33,5 @@ json RPC::getEmailVerifyCode(const std::string& email) {
 		return {{"status", "error"}, {"message", response.error()}};
 	}
 
-	return {{"status", "ok"}, {"code", response.code()}};
+	return {{"status", "ok"}, {"message", ""}};
 }

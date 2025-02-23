@@ -1,5 +1,7 @@
 #pragma once
 
+#include "DAO/ErrorCode.h"
+
 #include <string>
 #include <vector>
 #include <optional>
@@ -34,7 +36,6 @@ public:
 
 	virtual ~UserDao() = default;
 
-protected:
 	// 根据用户名查询用户
 	virtual std::optional<User> queryByUsername(const std::string& username) = 0;
 
@@ -42,13 +43,13 @@ protected:
 	virtual std::vector<User> queryByEmail(const std::string& email) = 0;
 
 	// 添加用户(注册)
-	virtual bool addUser(const User& user) = 0;
+	virtual ErrorCode addUser(const User& user) = 0;
 
 	// 删除用户(注销)
-	virtual bool deleteUser(int id) = 0;
+	virtual ErrorCode deleteUser(int id) = 0;
 
 	// 更新用户信息
-	virtual bool modifyPasswd(const std::string& username, const std::string& newPasswd) = 0;
-	virtual bool modifyAvatar(const std::string& username, const std::string& newAvatar) = 0;
-	virtual bool modifyEmail(const std::string& username, const std::string& newEmail) = 0;
+	virtual ErrorCode modifyPasswd(const std::string& username, const std::string& newPasswd) = 0;
+	virtual ErrorCode modifyAvatar(const std::string& username, const std::string& newAvatar) = 0;
+	virtual ErrorCode modifyEmail(const std::string& username, const std::string& newEmail) = 0;
 };

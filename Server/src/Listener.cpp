@@ -15,8 +15,8 @@ void Listener::start() {
 				return;
 			}
 
-			auto ep = socket.remote_endpoint();
-			fmt::println("{}:{} connected", ep.address().to_string(), ep.port());
+			// auto ep = socket.remote_endpoint();
+			// fmt::println("{}:{} connected", ep.address().to_string(), ep.port());
 
 			self->on_accept(std::move(socket));
 		});

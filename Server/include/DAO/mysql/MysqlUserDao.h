@@ -51,16 +51,13 @@ public:
 	std::vector<User> queryByEmail(const std::string& email) override;
 
 	// 添加用户
-	bool addUser(const User& user) override;
+	ErrorCode addUser(const User& user) override;
 
 	// 删除用户
-	bool deleteUser(int id) override;
+	ErrorCode deleteUser(int id) override;
 
 	// 更新用户信息
-	bool modifyPasswd(const std::string& username, const std::string& newPasswd) override;
-	bool modifyAvatar(const std::string& username, const std::string& newAvatar) override;
-	bool modifyEmail(const std::string& username, const std::string& newEmail) override;
-
-	static std::string hashPassword(const std::string& password);
-	static bool verifyPassword(const std::string& password, const std::string& hash);
+	ErrorCode modifyPasswd(const std::string& username, const std::string& newPasswd) override;
+	ErrorCode modifyAvatar(const std::string& username, const std::string& newAvatar) override;
+	ErrorCode modifyEmail(const std::string& username, const std::string& newEmail) override;
 };

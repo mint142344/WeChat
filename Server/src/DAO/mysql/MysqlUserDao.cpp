@@ -11,7 +11,9 @@ std::optional<User> MysqlUserDao::queryByUsername(const std::string& username) {
 	MysqlConnGuard guard(MysqlConnPool::getInstance()->getConnection());
 
 	try {
-		PstmtPtr pstmt(guard->prepareStatement("SELECT * FROM users WHERE username = ?"));
+		PstmtPtr pstmt(
+			guard->prepareStatement("SELECT id,username,password,email,avatar_url,create_time FROM "
+									"users WHERE BINARY username = ?"));
 		pstmt->setString(1, username);
 
 		ResPtr res(pstmt->executeQuery());
@@ -49,7 +51,7 @@ std::vector<User> MysqlUserDao::queryByEmail(const std::string& email) {
 	}
 }
 
-bool MysqlUserDao::addUser(const User& user) {
+ErrorCode MysqlUserDao::addUser(const User& user) {
 	MysqlConnGuard guard(MysqlConnPool::getInstance()->getConnection());
 
 	try {
@@ -59,32 +61,42 @@ bool MysqlUserDao::addUser(const User& user) {
 		pstmt->setString(2, PasswdHasher::passwd_hash(user.password));
 		pstmt->setString(3, user.email);
 
-		return pstmt->executeUpdate() > 0;
+		if (pstmt->executeUpdate() > 0) {
+			return ErrorCode::OK;
+		}
+
+		return ErrorCode::DB_ERROR;
 	} catch (sql::SQLException& e) {
 		// 用户已存在
 		if (e.getErrorCode() == 1062) {
-			return false;
+			return ErrorCode::ALREADY_EXISTS;
 		}
+
 		fmt::print(stderr, "MysqlUserDao::addUser: {}\n", e.what());
-		return false;
+
+		return ErrorCode::DB_ERROR;
 	}
 }
 
-bool MysqlUserDao::deleteUser(int id) {
+ErrorCode MysqlUserDao::deleteUser(int id) {
 	MysqlConnGuard guard(MysqlConnPool::getInstance()->getConnection());
 
 	try {
 		PstmtPtr pstmt(guard->prepareStatement("DELETE FROM users WHERE id = ?"));
 		pstmt->setInt(1, id);
 
-		return pstmt->executeUpdate() > 0;
+		if (pstmt->executeUpdate() > 0) {
+			return ErrorCode::OK;
+		}
+
+		return ErrorCode::NOT_FOUND;
 	} catch (sql::SQLException& e) {
 		fmt::print(stderr, "MysqlUserDao::deleteUser: {}\n", e.what());
-		return false;
+		return ErrorCode::DB_ERROR;
 	}
 }
 
-bool MysqlUserDao::modifyPasswd(const std::string& username, const std::string& newPasswd) {
+ErrorCode MysqlUserDao::modifyPasswd(const std::string& username, const std::string& newPasswd) {
 	MysqlConnGuard guard(MysqlConnPool::getInstance()->getConnection());
 
 	try {
@@ -92,15 +104,18 @@ bool MysqlUserDao::modifyPasswd(const std::string& username, const std::string& 
 		pstmt->setString(1, PasswdHasher::passwd_hash(newPasswd));
 		pstmt->setString(2, username);
 
-		return pstmt->executeUpdate() > 0;
+		if (pstmt->executeUpdate() > 0) {
+			return ErrorCode::OK;
+		}
 
+		return ErrorCode::NOT_FOUND;
 	} catch (sql::SQLException& e) {
 		fmt::print(stderr, "MysqlUserDao::modifyPasswd: {}\n", e.what());
-		return false;
+		return ErrorCode::DB_ERROR;
 	}
 }
 
-bool MysqlUserDao::modifyAvatar(const std::string& username, const std::string& newAvatar) {
+ErrorCode MysqlUserDao::modifyAvatar(const std::string& username, const std::string& newAvatar) {
 	MysqlConnGuard guard(MysqlConnPool::getInstance()->getConnection());
 
 	try {
@@ -109,15 +124,18 @@ bool MysqlUserDao::modifyAvatar(const std::string& username, const std::string& 
 		pstmt->setString(1, newAvatar);
 		pstmt->setString(2, username);
 
-		return pstmt->executeUpdate() > 0;
+		if (pstmt->executeUpdate() > 0) {
+			return ErrorCode::OK;
+		}
 
+		return ErrorCode::NOT_FOUND;
 	} catch (sql::SQLException& e) {
 		fmt::print(stderr, "MysqlUserDao::modifyAvatar: {}\n", e.what());
-		return false;
+		return ErrorCode::DB_ERROR;
 	}
 }
 
-bool MysqlUserDao::modifyEmail(const std::string& username, const std::string& newEmail) {
+ErrorCode MysqlUserDao::modifyEmail(const std::string& username, const std::string& newEmail) {
 	MysqlConnGuard guard(MysqlConnPool::getInstance()->getConnection());
 
 	try {
@@ -125,10 +143,13 @@ bool MysqlUserDao::modifyEmail(const std::string& username, const std::string& n
 		pstmt->setString(1, newEmail);
 		pstmt->setString(2, username);
 
-		return pstmt->executeUpdate() > 0;
+		if (pstmt->executeUpdate() > 0) {
+			return ErrorCode::OK;
+		}
 
+		return ErrorCode::NOT_FOUND;
 	} catch (sql::SQLException& e) {
 		fmt::print(stderr, "MysqlUserDao::modifyEmail: {}\n", e.what());
-		return false;
+		return ErrorCode::DB_ERROR;
 	}
 }

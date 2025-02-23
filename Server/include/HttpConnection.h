@@ -12,8 +12,8 @@ public:
 	HttpConnection(net::io_context& ioc, tcp::socket socket);
 
 	~HttpConnection() {
-		auto ep = m_socket.remote_endpoint();
-		fmt::println("{}:{} disconnected", ep.address().to_string(), ep.port());
+		// auto ep = m_socket.remote_endpoint();
+		// fmt::println("{}:{} disconnected", ep.address().to_string(), ep.port());
 	}
 
 	void start();

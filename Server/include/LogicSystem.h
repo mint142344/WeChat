@@ -19,14 +19,17 @@ class LogicSystem : public Singleton<LogicSystem> {
 	friend class Singleton<LogicSystem>;
 
 public:
-	LogicSystem();
+	LogicSystem() = default;
 	~LogicSystem() = default;
 	LogicSystem(const LogicSystem&) = delete;
 	LogicSystem(LogicSystem&&) = delete;
 	LogicSystem& operator=(const LogicSystem&) = delete;
 	LogicSystem& operator=(LogicSystem&&) = delete;
 
-	// 处理GET请求
+	// 初始化所有请求处理函数
+	void init();
+
+	// 处理 GET/POST 请求
 	bool handleRequest(const std::string& route, const HttpRequest& req, HttpResponse& res);
 
 private:
