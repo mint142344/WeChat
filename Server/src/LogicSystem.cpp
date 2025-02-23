@@ -1,5 +1,5 @@
 #include "LogicSystem.h"
-#include "EmailVerifyClient.h"
+#include "pool/RpcConnPool.h"
 
 #include <fmt/base.h>
 #include <exception>
@@ -32,7 +32,7 @@ LogicSystem::LogicSystem() {
 		res.prepare_payload();
 	});
 
-	// POST /verify_code
+	// POST /verify_code	获取邮箱验证码
 	registerRoute(
 		"/verify_code", http::verb::post, [this](const HttpRequest& req, HttpResponse& res) {
 			json data;
@@ -64,7 +64,7 @@ LogicSystem::LogicSystem() {
 			}
 		});
 
-	// POST /register
+	// POST /register	注册
 	registerRoute("/register", http::verb::post, [this](const HttpRequest& req, HttpResponse& res) {
 		fmt::println("post /register");
 		json data;
@@ -82,6 +82,53 @@ LogicSystem::LogicSystem() {
 			beast::ostream(res.body()) << data.dump();
 			res.prepare_payload();
 
+		} catch (const std::exception& e) {
+			// json parse failed
+			res = ErrorResponse{}(http::status::bad_request, "Incorrect request format");
+			return;
+		}
+	});
+
+	// POST /forget_password	忘记密码
+	registerRoute(
+		"/forget_password", http::verb::post, [this](const HttpRequest& req, HttpResponse& res) {
+			fmt::println("post /forget_password");
+			json data;
+			try {
+				json req_json = json::parse(req.body());
+
+				fmt::println("  email:{}\n  verify_code:{}", req_json["email"].get<std::string>(),
+							 req_json["verify_code"].get<std::string>());
+
+				res.result(http::status::ok);
+				res.set(http::field::content_type, "application/json");
+
+				json data = {{"status", "error"}, {"message", "修改密码失败"}};
+				beast::ostream(res.body()) << data.dump();
+				res.prepare_payload();
+			} catch (const std::exception& e) {
+				// json parse failed
+				res = ErrorResponse{}(http::status::bad_request, "Incorrect request format");
+				return;
+			}
+		});
+
+	// POST /login	登录
+	registerRoute("/login", http::verb::post, [this](const HttpRequest& rep, HttpResponse& res) {
+		fmt::println("post /login");
+		json data;
+		try {
+			json req_json = json::parse(rep.body());
+
+			fmt::println("  username:{}\n  password:{}", req_json["username"].get<std::string>(),
+						 req_json["password"].get<std::string>());
+
+			res.result(http::status::ok);
+			res.set(http::field::content_type, "application/json");
+
+			json data = {{"status", "error"}, {"message", "登录失败，用户名或密码错误"}};
+			beast::ostream(res.body()) << data.dump();
+			res.prepare_payload();
 		} catch (const std::exception& e) {
 			// json parse failed
 			res = ErrorResponse{}(http::status::bad_request, "Incorrect request format");
@@ -140,7 +187,8 @@ bool LogicSystem::handleRequest(const std::string& route, const HttpRequest& req
 	return false;
 }
 
-void LogicSystem::registerRoute(const std::string& route, http::verb method, RouteHandler handler) {
+void LogicSystem::registerRoute(const std::string& route, http::verb method,
+								const RouteHandler& handler) {
 	switch (method) {
 		case http::verb::get:
 			m_get_handlers.insert({route, handler});

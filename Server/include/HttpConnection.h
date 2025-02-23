@@ -4,11 +4,18 @@
 
 class HttpConnection : public std::enable_shared_from_this<HttpConnection> {
 public:
+	HttpConnection(const HttpConnection&) = delete;
+	HttpConnection(HttpConnection&&) = delete;
+	HttpConnection& operator=(const HttpConnection&) = delete;
+	HttpConnection& operator=(HttpConnection&&) = delete;
+
 	HttpConnection(net::io_context& ioc, tcp::socket socket);
+
 	~HttpConnection() {
 		auto ep = m_socket.remote_endpoint();
 		fmt::println("{}:{} disconnected", ep.address().to_string(), ep.port());
 	}
+
 	void start();
 
 private:

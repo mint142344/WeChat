@@ -1,6 +1,5 @@
-#include "RedisConnPool.h"
+#include "pool/RedisConnPool.h"
 #include <gtest/gtest.h>
-#include <cstddef>
 #include <iostream>
 #include <thread>
 #include <vector>
@@ -132,6 +131,7 @@ TEST_F(RedisConnPoolTest, ConcurrentOperationsTest) {
 	};
 
 	std::vector<std::thread> threads;
+	threads.reserve(THREAD_COUNT);
 	for (int i = 0; i < THREAD_COUNT; ++i) {
 		threads.emplace_back(worker, i);
 	}

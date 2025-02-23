@@ -21,13 +21,17 @@ class LogicSystem : public Singleton<LogicSystem> {
 public:
 	LogicSystem();
 	~LogicSystem() = default;
+	LogicSystem(const LogicSystem&) = delete;
+	LogicSystem(LogicSystem&&) = delete;
+	LogicSystem& operator=(const LogicSystem&) = delete;
+	LogicSystem& operator=(LogicSystem&&) = delete;
 
 	// 处理GET请求
 	bool handleRequest(const std::string& route, const HttpRequest& req, HttpResponse& res);
 
 private:
 	// 注册路由
-	void registerRoute(const std::string& route, http::verb method, RouteHandler handler);
+	void registerRoute(const std::string& route, http::verb method, const RouteHandler& handler);
 
 private:
 	std::map<std::string, RouteHandler> m_get_handlers;

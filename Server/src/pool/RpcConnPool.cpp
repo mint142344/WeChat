@@ -1,24 +1,18 @@
-#include "EmailVerifyClient.h"
+#include "pool/RpcConnPool.h"
 #include <fmt/base.h>
 #include <grpcpp/support/status.h>
-#include <cstdio>
 #include "message.grpc.pb.h"
 
 json RPC::getEmailVerifyCode(const std::string& email) {
 	// 取出一个空闲的 Stub
-	std::unique_ptr<EmailVerifyService::Stub> stub =
-		RpcServiceConnPool<EmailVerifyService>::getInstance()->get();
+	std::shared_ptr<EmailVerifyService::Stub> stub =
+		RpcServiceConnPool<EmailVerifyService>::getInstance()->getConnection();
 	if (!stub) {
 		return {{"status", "error"}, {"message", "No available connection to email server"}};
 	}
 
 	// RAII 归还 Stub
-	struct StubGuard {
-		std::unique_ptr<EmailVerifyService::Stub> stub;
-		~StubGuard() {
-			RpcServiceConnPool<EmailVerifyService>::getInstance()->put(std::move(stub));
-		}
-	} guard{std::move(stub)};
+	StubGuard<EmailVerifyService> guard(stub);
 
 	EmailVerifyResponse response;
 	ClientContext context;
@@ -27,7 +21,7 @@ json RPC::getEmailVerifyCode(const std::string& email) {
 	EmailVerifyRequest request;
 	request.set_email(email);
 
-	Status status = guard.stub->getEmailVerifyCode(&context, request, &response);
+	Status status = guard->getEmailVerifyCode(&context, request, &response);
 
 	if (!status.ok()) {
 		if (status.error_code() == grpc::StatusCode::DEADLINE_EXCEEDED) {

@@ -1,4 +1,6 @@
-#include "IoContextPool.h"
+#include "pool/IoContextPool.h"
+
+#include <algorithm>
 
 IoContextPool::~IoContextPool() { stop(); }
 
@@ -8,9 +10,7 @@ void IoContextPool::start(uint32_t pool_size) {
 	if (m_pool_size <= 0)
 		throw std::invalid_argument("IoContextPool::start: pool_size must be greater than 0");
 
-	if (m_pool_size > std::thread::hardware_concurrency()) {
-		m_pool_size = std::thread::hardware_concurrency();
-	}
+	m_pool_size = std::min(m_pool_size, std::thread::hardware_concurrency());
 
 	for (int i = 0; i < m_pool_size; ++i) {
 		m_contexts.emplace_back(std::make_unique<net::io_context>());

@@ -1,4 +1,4 @@
-#include "IoContextPool.h"
+#include "pool/IoContextPool.h"
 #include <gtest/gtest.h>
 #include <atomic>
 #include <chrono>
@@ -43,6 +43,7 @@ TEST_F(IoContextPoolTest, WorkloadDistributionTest) {
 
 	// First get references to all contexts
 	std::vector<net::io_context*> contexts;
+	contexts.reserve(4);
 	for (int i = 0; i < 4; ++i) {
 		contexts.push_back(&pool->getIoContext());
 	}

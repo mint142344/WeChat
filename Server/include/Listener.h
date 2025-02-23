@@ -4,7 +4,7 @@
 
 class Listener : public std::enable_shared_from_this<Listener> {
 public:
-	Listener(net::io_context& ioc, tcp::endpoint endpoint);
+	Listener(net::io_context& ioc, const tcp::endpoint& endpoint);
 
 	void start();
 

@@ -9,7 +9,13 @@ class ConfigManager : public Singleton<ConfigManager> {
 	friend class Singleton<ConfigManager>;
 
 public:
+	ConfigManager() = default;
 	~ConfigManager() = default;
+	ConfigManager(const ConfigManager&) = delete;
+	ConfigManager(ConfigManager&&) = delete;
+	ConfigManager& operator=(const ConfigManager&) = delete;
+	ConfigManager& operator=(ConfigManager&&) = delete;
+
 	void load(const std::string& path);
 
 private:
