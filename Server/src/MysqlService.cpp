@@ -26,13 +26,12 @@ ErrorCode MysqlService::login(const std::string& username, const std::string& pa
 	if (!m_initialized) throw std::runtime_error("MysqlService not initialized");
 
 	// 查找用户
-	auto user = m_user_dao->queryByUsername(username);
-	if (!user) {
-		return ErrorCode::NOT_FOUND;
-	}
+	User user;
+	ErrorCode ec = m_user_dao->queryByUsername(username, user);
+	if (ec != ErrorCode::OK) return ec;
 
 	// 验证密码
-	if (user->password != PasswdHasher::passwd_hash(passwd)) {
+	if (user.password != PasswdHasher::passwd_hash(passwd)) {
 		return ErrorCode::PASSWORD_ERROR;
 	}
 

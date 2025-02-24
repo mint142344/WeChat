@@ -1,5 +1,6 @@
 #pragma once
 
+#include "DAO/ErrorCode.h"
 #include "DAO/user.h"
 
 #include <openssl/crypto.h>
@@ -11,6 +12,7 @@
 #include <iomanip>
 #include <sstream>
 #include <string>
+#include <vector>
 
 // 密码 hash 与验证
 struct PasswdHasher {
@@ -45,10 +47,10 @@ private:
 class MysqlUserDao : public UserDao {
 public:
 	// 根据用户名查询用户
-	std::optional<User> queryByUsername(const std::string& username) override;
+	ErrorCode queryByUsername(const std::string& username, User& user) override;
 
 	// 根据邮箱查询用户
-	std::vector<User> queryByEmail(const std::string& email) override;
+	ErrorCode queryByEmail(const std::string& email, std::vector<User>& users) override;
 
 	// 添加用户
 	ErrorCode addUser(const User& user) override;

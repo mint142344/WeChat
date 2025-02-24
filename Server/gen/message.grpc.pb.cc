@@ -82,5 +82,108 @@ EmailVerifyService::Service::~Service() {
 }
 
 
+static const char* StatusService_method_names[] = {
+  "/message.StatusService/getChatServerInfo",
+  "/message.StatusService/loginChatServer",
+};
+
+std::unique_ptr< StatusService::Stub> StatusService::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
+  (void)options;
+  std::unique_ptr< StatusService::Stub> stub(new StatusService::Stub(channel, options));
+  return stub;
+}
+
+StatusService::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options)
+  : channel_(channel), rpcmethod_getChatServerInfo_(StatusService_method_names[0], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_loginChatServer_(StatusService_method_names[1], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  {}
+
+::grpc::Status StatusService::Stub::getChatServerInfo(::grpc::ClientContext* context, const ::message::ChatServerRequest& request, ::message::ChatServerResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::message::ChatServerRequest, ::message::ChatServerResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_getChatServerInfo_, context, request, response);
+}
+
+void StatusService::Stub::async::getChatServerInfo(::grpc::ClientContext* context, const ::message::ChatServerRequest* request, ::message::ChatServerResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::message::ChatServerRequest, ::message::ChatServerResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_getChatServerInfo_, context, request, response, std::move(f));
+}
+
+void StatusService::Stub::async::getChatServerInfo(::grpc::ClientContext* context, const ::message::ChatServerRequest* request, ::message::ChatServerResponse* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_getChatServerInfo_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::message::ChatServerResponse>* StatusService::Stub::PrepareAsyncgetChatServerInfoRaw(::grpc::ClientContext* context, const ::message::ChatServerRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::message::ChatServerResponse, ::message::ChatServerRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_getChatServerInfo_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::message::ChatServerResponse>* StatusService::Stub::AsyncgetChatServerInfoRaw(::grpc::ClientContext* context, const ::message::ChatServerRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncgetChatServerInfoRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
+::grpc::Status StatusService::Stub::loginChatServer(::grpc::ClientContext* context, const ::message::LoginRequest& request, ::message::LoginResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::message::LoginRequest, ::message::LoginResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_loginChatServer_, context, request, response);
+}
+
+void StatusService::Stub::async::loginChatServer(::grpc::ClientContext* context, const ::message::LoginRequest* request, ::message::LoginResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::message::LoginRequest, ::message::LoginResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_loginChatServer_, context, request, response, std::move(f));
+}
+
+void StatusService::Stub::async::loginChatServer(::grpc::ClientContext* context, const ::message::LoginRequest* request, ::message::LoginResponse* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_loginChatServer_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::message::LoginResponse>* StatusService::Stub::PrepareAsyncloginChatServerRaw(::grpc::ClientContext* context, const ::message::LoginRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::message::LoginResponse, ::message::LoginRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_loginChatServer_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::message::LoginResponse>* StatusService::Stub::AsyncloginChatServerRaw(::grpc::ClientContext* context, const ::message::LoginRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncloginChatServerRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
+StatusService::Service::Service() {
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      StatusService_method_names[0],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< StatusService::Service, ::message::ChatServerRequest, ::message::ChatServerResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](StatusService::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::message::ChatServerRequest* req,
+             ::message::ChatServerResponse* resp) {
+               return service->getChatServerInfo(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      StatusService_method_names[1],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< StatusService::Service, ::message::LoginRequest, ::message::LoginResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](StatusService::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::message::LoginRequest* req,
+             ::message::LoginResponse* resp) {
+               return service->loginChatServer(ctx, req, resp);
+             }, this)));
+}
+
+StatusService::Service::~Service() {
+}
+
+::grpc::Status StatusService::Service::getChatServerInfo(::grpc::ServerContext* context, const ::message::ChatServerRequest* request, ::message::ChatServerResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status StatusService::Service::loginChatServer(::grpc::ServerContext* context, const ::message::LoginRequest* request, ::message::LoginResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+
 }  // namespace message
 

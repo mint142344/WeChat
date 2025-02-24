@@ -29,8 +29,8 @@ json RPC::getEmailVerifyCode(const std::string& email) {
 			return {{"status", "error"}, {"message", "Request timeout"}};
 		}
 
-		fmt::println(stderr, "RPC::getEmailVerifyCode {}", response.error());
-		return {{"status", "error"}, {"message", response.error()}};
+		fmt::println(stderr, "RPC::getEmailVerifyCode {}", response.message());
+		return {{"status", "error"}, {"message", response.message()}};
 	}
 
 	return {{"status", "ok"}, {"message", ""}};

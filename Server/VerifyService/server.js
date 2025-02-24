@@ -32,8 +32,7 @@ async function getEmailVerifyCode(call, callback) {
 
         callback(null, {
             status: "ok",
-            code: verificationCode,
-            error: ""
+            message: ""
         });
 
         console.log(`Verification code sent to ${email}: ${verificationCode}`);
@@ -41,8 +40,7 @@ async function getEmailVerifyCode(call, callback) {
 
         callback(null, {
             status: "error",
-            code: "",
-            error: error
+            message: error
         });
         console.log(`Error sending verification code to ${email}: ${error}`);
     }

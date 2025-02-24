@@ -12,11 +12,13 @@
  2. 配置 RPC 邮箱服务host和port
 
 ## 邮箱服务
-- RPC客户端
-
- `GateServer`搭建邮箱验证 RPC 服务客户端(单例)
-- RPC服务端
-
- Nodejs实现rpc server，完成邮箱服务
+`npm install @grpc/grp-js @grpc/proto-loader nodemailer ioredis`
+- RPC客户端: `GateServer`搭建邮箱验证 RPC 服务客户端(单例)
+- RPC服务端: Nodejs实现rpc server，完成邮箱服务
  
- `npm install @grpc/grp-js @grpc/proto-loader nodemailer ioredis`
+
+## 状态服务
+- RPC客户端: `GateServer`获取`ChatServer`信息返回给登录成功的用户
+- RPC服务端: `StatusServer`维护多个ChatServer信息 
+  - 完成返回`ChatServer`信息服务
+  - 完成返回连接到`ChatServer`的登录服务

@@ -4,7 +4,6 @@
 
 #include <string>
 #include <vector>
-#include <optional>
 
 struct User {
 	User() = default;
@@ -37,10 +36,10 @@ public:
 	virtual ~UserDao() = default;
 
 	// 根据用户名查询用户
-	virtual std::optional<User> queryByUsername(const std::string& username) = 0;
+	virtual ErrorCode queryByUsername(const std::string& username, User& user) = 0;
 
 	// 根据邮箱查询用户
-	virtual std::vector<User> queryByEmail(const std::string& email) = 0;
+	virtual ErrorCode queryByEmail(const std::string& email, std::vector<User>& users) = 0;
 
 	// 添加用户(注册)
 	virtual ErrorCode addUser(const User& user) = 0;

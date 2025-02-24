@@ -2,8 +2,9 @@ syntax = "proto3";
 
 package message;
 
-// protoc --cpp_out=gen -I=proto ./proto/*.proto
-// protoc --grpc_out=gen --plugin=protoc-gen-grpc=`which grpc_cpp_plugin` -Iproto proto/example.proto
+// > Server directory
+// protoc --cpp_out=gen -I=. message.proto
+// protoc --grpc_out=gen --plugin=protoc-gen-grpc=`which grpc_cpp_plugin` -I. message.proto
 
 service EmailVerifyService {
     rpc getEmailVerifyCode(EmailVerifyRequest) returns (EmailVerifyResponse);
@@ -15,6 +16,33 @@ message EmailVerifyRequest {
 
 message EmailVerifyResponse{
     string status = 1;
-    string code = 2;
-    string error = 3;
+    string message = 2; // error message
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
+message ChatServerRequest {
+    uint32 id = 1;      // 数据库中的用户 id
+}
+
+message ChatServerResponse {
+    string host = 1;
+    string port = 2;
+    string token = 3;   // 连接到 ChatServer 的 token
+    string message = 4; // error message
+}
+
+
+message LoginRequest {
+    uint32 id = 1;
+    string token = 2;
+}
+
+message LoginResponse {
+    string message = 1;
+}
+
+service StatusService {
+    rpc getChatServerInfo (ChatServerRequest) returns (ChatServerResponse);
+    rpc loginChatServer (LoginRequest) returns (LoginResponse);
 }

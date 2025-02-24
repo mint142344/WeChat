@@ -106,10 +106,10 @@ void LogicSystem::init() {
 				redis_guard->del(key.c_str());
 
 			} else if (ec == ErrorCode::ALREADY_EXISTS) {
-				data = {{"status", "error"}, {"message", "用户已存在"}};
+				data = {{"status", "error"}, {"message", "注册失败，该用户已存在"}};
 
 			} else {
-				data = {{"status", "error"}, {"message", "注册失败"}};
+				data = {{"status", "error"}, {"message", "注册失败，服务器内部错误"}};
 			}
 
 			beast::ostream(res.body()) << data.dump();
@@ -159,8 +159,10 @@ void LogicSystem::init() {
 					// 删除 redis 缓存
 					redis_guard->del(key.c_str());
 
-				} else {
+				} else if (ec == ErrorCode::NOT_FOUND) {
 					data = {{"status", "error"}, {"message", "修改密码失败,清检查用户名是否正确"}};
+				} else {
+					data = {{"status", "error"}, {"message", "修改密码失败，服务器内部错误"}};
 				}
 
 				beast::ostream(res.body()) << data.dump();
@@ -190,6 +192,8 @@ void LogicSystem::init() {
 
 			if (ec == ErrorCode::OK) {
 				data = {{"status", "ok"}, {"message", "登录成功"}};
+			} else if (ec == ErrorCode::DB_ERROR) {
+				data = {{"status", "error"}, {"message", "登录失败，服务器内部错误"}};
 			} else {
 				data = {{"status", "error"}, {"message", "用户名或密码错误"}};
 			}

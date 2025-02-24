@@ -29,7 +29,7 @@ void MysqlConnPool::init(const std::string& host, uint16_t port, const std::stri
 	try {
 		sql::mysql::MySQL_Driver* driver = sql::mysql::get_driver_instance();
 
-		for (int i = 0; i < pool_size; ++i) {
+		for (size_t i = 0; i < pool_size; ++i) {
 			sql::Connection* conn =
 				driver->connect("tcp://" + host + ":" + std::to_string(port), user, password);
 			if (conn == nullptr) {

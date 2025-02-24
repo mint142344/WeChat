@@ -7,7 +7,7 @@
 #include <jdbc/cppconn/statement.h>
 #include <jdbc/cppconn/prepared_statement.h>
 
-std::optional<User> MysqlUserDao::queryByUsername(const std::string& username) {
+ErrorCode MysqlUserDao::queryByUsername(const std::string& username, User& user) {
 	MysqlConnGuard guard(MysqlConnPool::getInstance()->getConnection());
 
 	try {
@@ -18,20 +18,22 @@ std::optional<User> MysqlUserDao::queryByUsername(const std::string& username) {
 
 		ResPtr res(pstmt->executeQuery());
 		if (res->next()) {
-			return User(res->getInt(1), res->getString(2), res->getString(3), res->getString(4),
-						res->getString(5), res->getString(6));
+			user = {res->getInt(1),	   res->getString(2), res->getString(3),
+					res->getString(4), res->getString(5), res->getString(6)};
+
+			return ErrorCode::OK;
 		}
 
-		return std::nullopt;
+		return ErrorCode::NOT_FOUND;
 	} catch (sql::SQLException& e) {
-		fmt::print(stderr, "MysqlUserDao::queryByUsername: {}\n", e.what());
-		return std::nullopt;
+		fmt::println(stderr, "[{}:{}] MysqlUserDao::queryByUsername: {}\n", e.getErrorCode(),
+					 e.getSQLState(), e.what());
+		return ErrorCode::DB_ERROR;
 	}
 }
 
-std::vector<User> MysqlUserDao::queryByEmail(const std::string& email) {
+ErrorCode MysqlUserDao::queryByEmail(const std::string& email, std::vector<User>& users) {
 	MysqlConnGuard guard(MysqlConnPool::getInstance()->getConnection());
-	std::vector<User> users;
 
 	try {
 		PstmtPtr pstmt(guard->prepareStatement("SELECT * FROM users WHERE email = ?"));
@@ -43,11 +45,15 @@ std::vector<User> MysqlUserDao::queryByEmail(const std::string& email) {
 							   res->getString(4), res->getString(5), res->getString(6));
 		}
 
-		return users;
+		if (users.empty()) {
+			return ErrorCode::NOT_FOUND;
+		}
 
+		return ErrorCode::OK;
 	} catch (sql::SQLException& e) {
-		fmt::print(stderr, "MysqlUserDao::queryByEmail: {}\n", e.what());
-		return {};
+		fmt::println(stderr, "[{}:{}] MysqlUserDao::queryByEmail: {}\n", e.getErrorCode(),
+					 e.getSQLState(), e.what());
+		return ErrorCode::DB_ERROR;
 	}
 }
 
@@ -72,8 +78,8 @@ ErrorCode MysqlUserDao::addUser(const User& user) {
 			return ErrorCode::ALREADY_EXISTS;
 		}
 
-		fmt::print(stderr, "MysqlUserDao::addUser: {}\n", e.what());
-
+		fmt::println(stderr, "[{}:{}] MysqlUserDao::addUser: {}\n", e.getErrorCode(),
+					 e.getSQLState(), e.what());
 		return ErrorCode::DB_ERROR;
 	}
 }
@@ -91,7 +97,8 @@ ErrorCode MysqlUserDao::deleteUser(int id) {
 
 		return ErrorCode::NOT_FOUND;
 	} catch (sql::SQLException& e) {
-		fmt::print(stderr, "MysqlUserDao::deleteUser: {}\n", e.what());
+		fmt::println(stderr, "[{}:{}] MysqlUserDao::deleteUser: {}\n", e.getErrorCode(),
+					 e.getSQLState(), e.what());
 		return ErrorCode::DB_ERROR;
 	}
 }
@@ -110,7 +117,8 @@ ErrorCode MysqlUserDao::modifyPasswd(const std::string& username, const std::str
 
 		return ErrorCode::NOT_FOUND;
 	} catch (sql::SQLException& e) {
-		fmt::print(stderr, "MysqlUserDao::modifyPasswd: {}\n", e.what());
+		fmt::println(stderr, "[{}:{}] MysqlUserDao::modifyPasswd: {}\n", e.getErrorCode(),
+					 e.getSQLState(), e.what());
 		return ErrorCode::DB_ERROR;
 	}
 }
@@ -130,7 +138,8 @@ ErrorCode MysqlUserDao::modifyAvatar(const std::string& username, const std::str
 
 		return ErrorCode::NOT_FOUND;
 	} catch (sql::SQLException& e) {
-		fmt::print(stderr, "MysqlUserDao::modifyAvatar: {}\n", e.what());
+		fmt::println(stderr, "[{}:{}] MysqlUserDao::modifyAvatar: {}\n", e.getErrorCode(),
+					 e.getSQLState(), e.what());
 		return ErrorCode::DB_ERROR;
 	}
 }
@@ -149,7 +158,8 @@ ErrorCode MysqlUserDao::modifyEmail(const std::string& username, const std::stri
 
 		return ErrorCode::NOT_FOUND;
 	} catch (sql::SQLException& e) {
-		fmt::print(stderr, "MysqlUserDao::modifyEmail: {}\n", e.what());
+		fmt::println(stderr, "[{}:{}] MysqlUserDao::modifyEmail: {}\n", e.getErrorCode(),
+					 e.getSQLState(), e.what());
 		return ErrorCode::DB_ERROR;
 	}
 }
