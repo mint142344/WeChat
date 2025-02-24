@@ -21,40 +21,39 @@ RedisConnection::~RedisConnection() {
 bool RedisConnection::auth(const std::string& password) {
 	assert(m_context);
 
-	auto* reply = (redisReply*)(redisCommand(m_context, "AUTH %s", password.c_str()));
-	if (reply == nullptr) return false;
+	auto* reply = static_cast<redisReply*>(redisCommand(m_context, "AUTH %s", password.c_str()));
+	RedisReplyGuard guard(reply);
 
-	bool ok = (reply->type == REDIS_REPLY_STATUS && strcasecmp(reply->str, "OK") == 0);
+	if (!guard) return false;
 
-	freeReplyObject(reply);
-	return ok;
+	return (reply->type == REDIS_REPLY_STATUS && strcasecmp(reply->str, "OK") == 0);
 }
 
 bool RedisConnection::set(const std::string& key, const std::string& value) {
 	assert(m_context);
 
-	auto* reply = (redisReply*)redisCommand(m_context, "SET %s %s", key.c_str(), value.c_str());
-	if (reply == nullptr) return false;
+	auto* reply =
+		static_cast<redisReply*>(redisCommand(m_context, "SET %s %s", key.c_str(), value.c_str()));
+	RedisReplyGuard guard(reply);
 
-	bool ok = (reply->type == REDIS_REPLY_STATUS && strcasecmp(reply->str, "OK") == 0);
+	if (!guard) return false;
 
-	freeReplyObject(reply);
-	return ok;
+	return (reply->type == REDIS_REPLY_STATUS && strcasecmp(reply->str, "OK") == 0);
 }
 
 bool RedisConnection::get(const std::string& key, std::string& value) {
 	assert(m_context);
 
-	auto* reply = (redisReply*)redisCommand(m_context, "GET %s", key.c_str());
-	if (reply == nullptr) return false;
+	auto* reply = static_cast<redisReply*>(redisCommand(m_context, "GET %s", key.c_str()));
+	RedisReplyGuard guard(reply);
+
+	if (!guard) return false;
 
 	bool ok = false;
 	if (reply->type == REDIS_REPLY_STRING) {
 		value = reply->str;
 		ok = true;
 	}
-
-	freeReplyObject(reply);
 
 	return ok;
 }
@@ -62,39 +61,39 @@ bool RedisConnection::get(const std::string& key, std::string& value) {
 bool RedisConnection::del(const char* key) {
 	assert(m_context);
 
-	auto* reply = (redisReply*)redisCommand(m_context, "DEL %s", key);
-	if (reply == nullptr) return false;
+	auto* reply = static_cast<redisReply*>(redisCommand(m_context, "DEL %s", key));
+	RedisReplyGuard guard(reply);
 
-	bool ok = (reply->type == REDIS_REPLY_INTEGER && reply->integer == 1);
-	freeReplyObject(reply);
+	if (!guard) return false;
 
-	return ok;
+	return (reply->type == REDIS_REPLY_INTEGER && reply->integer == 1);
 }
 
 bool RedisConnection::LPush(const std::string& key, const std::string& value) {
 	assert(m_context);
 
-	auto* reply = (redisReply*)redisCommand(m_context, "LPUSH %s %s", key.c_str(), value.c_str());
-	if (reply == nullptr) return false;
+	auto* reply = static_cast<redisReply*>(
+		redisCommand(m_context, "LPUSH %s %s", key.c_str(), value.c_str()));
+	RedisReplyGuard guard(reply);
 
-	bool ok = (reply->type == REDIS_REPLY_INTEGER && reply->integer >= 0);
-	freeReplyObject(reply);
+	if (!guard) return false;
 
-	return ok;
+	return (reply->type == REDIS_REPLY_INTEGER && reply->integer >= 0);
 }
 
 bool RedisConnection::LPop(const std::string& key, std::string& value) {
 	assert(m_context);
 
-	auto* reply = (redisReply*)redisCommand(m_context, "LPOP %s", key.c_str());
-	if (reply == nullptr) return false;
+	auto* reply = static_cast<redisReply*>(redisCommand(m_context, "LPOP %s", key.c_str()));
+	RedisReplyGuard guard(reply);
+
+	if (!guard) return false;
 
 	bool ok = false;
 	if (reply->type == REDIS_REPLY_STRING) {
 		value = reply->str;
 		ok = true;
 	}
-	freeReplyObject(reply);
 
 	return ok;
 }
@@ -102,27 +101,28 @@ bool RedisConnection::LPop(const std::string& key, std::string& value) {
 bool RedisConnection::RPush(const std::string& key, const std::string& value) {
 	assert(m_context);
 
-	auto* reply = (redisReply*)redisCommand(m_context, "RPUSH %s %s", key.c_str(), value.c_str());
-	if (reply == nullptr) return false;
+	auto* reply = static_cast<redisReply*>(
+		redisCommand(m_context, "RPUSH %s %s", key.c_str(), value.c_str()));
+	RedisReplyGuard guard(reply);
 
-	bool ok = (reply->type == REDIS_REPLY_INTEGER && reply->integer >= 0);
-	freeReplyObject(reply);
+	if (!guard) return false;
 
-	return ok;
+	return (reply->type == REDIS_REPLY_INTEGER && reply->integer >= 0);
 }
 
 bool RedisConnection::RPop(const std::string& key, std::string& value) {
 	assert(m_context);
 
-	auto* reply = (redisReply*)redisCommand(m_context, "RPOP %s", key.c_str());
-	if (reply == nullptr) return false;
+	auto* reply = static_cast<redisReply*>(redisCommand(m_context, "RPOP %s", key.c_str()));
+	RedisReplyGuard guard(reply);
+
+	if (!guard) return false;
 
 	bool ok = false;
 	if (reply->type == REDIS_REPLY_STRING) {
 		value = reply->str;
 		ok = true;
 	}
-	freeReplyObject(reply);
 
 	return ok;
 }
@@ -131,29 +131,29 @@ bool RedisConnection::HSet(const std::string& key, const std::string& field,
 						   const std::string& value) {
 	assert(m_context);
 
-	auto* reply = (redisReply*)redisCommand(m_context, "HSET %s %s %s", key.c_str(), field.c_str(),
-											value.c_str());
-	if (reply == nullptr) return false;
+	auto* reply = static_cast<redisReply*>(
+		redisCommand(m_context, "HSET %s %s %s", key.c_str(), field.c_str(), value.c_str()));
+	RedisReplyGuard guard(reply);
 
-	bool ok = (reply->type == REDIS_REPLY_INTEGER && reply->integer == 1);
-	freeReplyObject(reply);
+	if (!guard) return false;
 
-	return ok;
+	return (reply->type == REDIS_REPLY_INTEGER && reply->integer == 1);
 }
 
 bool RedisConnection::HGet(const std::string& key, const std::string& field, std::string& value) {
 	assert(m_context);
 
-	auto* reply = (redisReply*)redisCommand(m_context, "HGET %s %s", key.c_str(), field.c_str());
+	auto* reply =
+		static_cast<redisReply*>(redisCommand(m_context, "HGET %s %s", key.c_str(), field.c_str()));
+	RedisReplyGuard guard(reply);
 
-	if (reply == nullptr) return false;
+	if (!guard) return false;
 
 	bool ok = false;
 	if (reply->type == REDIS_REPLY_STRING) {
 		value = reply->str;
 		ok = true;
 	}
-	freeReplyObject(reply);
 
 	return ok;
 }
@@ -161,13 +161,12 @@ bool RedisConnection::HGet(const std::string& key, const std::string& field, std
 bool RedisConnection::exists(const std::string& key) {
 	assert(m_context);
 
-	auto* reply = (redisReply*)redisCommand(m_context, "EXISTS %s", key.c_str());
-	if (reply == nullptr) return false;
+	auto* reply = static_cast<redisReply*>(redisCommand(m_context, "EXISTS %s", key.c_str()));
+	RedisReplyGuard guard(reply);
 
-	bool ok = (reply->type == REDIS_REPLY_INTEGER && reply->integer == 1);
-	freeReplyObject(reply);
+	if (!guard) return false;
 
-	return ok;
+	return (reply->type == REDIS_REPLY_INTEGER && reply->integer == 1);
 }
 
 bool RedisConnection::isVaild() const { return m_context != nullptr && m_context->err == 0; }
@@ -175,13 +174,13 @@ bool RedisConnection::isVaild() const { return m_context != nullptr && m_context
 bool RedisConnection::expire(const std::string& key, int seconds) {
 	assert(m_context);
 
-	auto* reply = (redisReply*)redisCommand(m_context, "EXPIRE %s %d", key.c_str(), seconds);
-	if (reply == nullptr) return false;
+	auto* reply =
+		static_cast<redisReply*>(redisCommand(m_context, "EXPIRE %s %d", key.c_str(), seconds));
+	RedisReplyGuard guard(reply);
 
-	bool ok = (reply->type == REDIS_REPLY_INTEGER && reply->integer == 1);
+	if (!guard) return false;
 
-	freeReplyObject(reply);
-	return ok;
+	return (reply->type == REDIS_REPLY_INTEGER && reply->integer == 1);
 }
 
 //////////////////////////////////////////////////////////////////////////

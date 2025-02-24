@@ -11,7 +11,7 @@ class MysqlConnPoolTest : public ::testing::Test {
 protected:
 	void SetUp() override {
 		pool = MysqlConnPool::getInstance();
-		pool->init("localhost", 3306, "root", "12345", "wechat", 4);
+		pool->init("119.3.185.203", 4406, "root", "123456", "test_db", 4);
 	}
 
 	void TearDown() override {

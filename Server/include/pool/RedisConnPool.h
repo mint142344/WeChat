@@ -111,3 +111,27 @@ struct RedisConnGuard {
 private:
 	RedisConnPtr m_conn;
 };
+
+// RAII redisReply 封装
+class RedisReplyGuard {
+public:
+	explicit RedisReplyGuard(redisReply* reply) : m_reply(reply) {}
+
+	~RedisReplyGuard() {
+		if (m_reply != nullptr) {
+			freeReplyObject(m_reply);
+		}
+	}
+
+	RedisReplyGuard(const RedisReplyGuard&) = delete;
+	RedisReplyGuard(RedisReplyGuard&&) = default;
+	RedisReplyGuard& operator=(const RedisReplyGuard&) = delete;
+	RedisReplyGuard& operator=(RedisReplyGuard&&) = default;
+
+	operator bool() const { return m_reply != nullptr; }
+
+	redisReply* operator->() { return m_reply; }
+
+private:
+	redisReply* m_reply = nullptr;
+};
