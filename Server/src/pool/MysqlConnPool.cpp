@@ -26,6 +26,8 @@ void MysqlConnPool::init(const std::string& host, uint16_t port, const std::stri
 	// 防止重复初始化
 	if (m_initialized) return;
 
+	pool_size = std::min<uint32_t>(pool_size, MAX_POOL_SIZE);
+
 	try {
 		sql::mysql::MySQL_Driver* driver = sql::mysql::get_driver_instance();
 

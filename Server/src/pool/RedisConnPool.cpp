@@ -199,13 +199,16 @@ void RedisConnPool::init(const std::string& ip, uint16_t port, uint32_t pool_siz
 	// 防止重复初始化
 	if (m_initialized) return;
 
+	pool_size = std::min<uint32_t>(pool_size, MAX_POOL_SIZE);
+
 	for (int i = 0; i < pool_size; ++i) {
 		redisContext* context = redisConnect(ip.c_str(), port);
 
 		if (context == nullptr || (context->err != 0)) {
 			if (context != nullptr) {
+				std::string error(context->errstr);
 				redisFree(context);
-				throw std::runtime_error(fmt::format("Redis conn pool: {}", context->errstr));
+				throw std::runtime_error(fmt::format("Redis conn pool: {}", error));
 			}
 
 			throw std::runtime_error("Can't connect to redis server");

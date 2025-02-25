@@ -54,6 +54,9 @@ class RedisConnPool : public Singleton<RedisConnPool> {
 	friend class Singleton<RedisConnPool>;
 
 public:
+	static constexpr uint32_t MAX_POOL_SIZE = 100;
+
+public:
 	RedisConnPool() = default;
 	RedisConnPool(const RedisConnPool&) = delete;
 	RedisConnPool(RedisConnPool&&) = delete;

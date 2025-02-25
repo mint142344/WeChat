@@ -21,11 +21,13 @@ find_library(LIB_MYSQL_CONNECTOR_CPP NAMES mysqlcppconn PATHS ${LIB_MYSQL_CONNEC
 
 file(GLOB_RECURSE SOURCES src/*.cpp)
 file(GLOB_RECURSE PROTO_GEN_SOURCES gen/*.cc)
+file(GLOB_RECURSE STATUS_SERVER_SOURCES StatusService/*.cpp)
 
 # 启动测试
 enable_testing()
 add_subdirectory(test)
 
+# 网关服务器
 add_executable(GateServer ${SOURCES} ${PROTO_GEN_SOURCES})
 target_link_libraries(GateServer PRIVATE
     Boost::boost
@@ -39,3 +41,14 @@ target_link_libraries(GateServer PRIVATE
     ${LIB_MYSQL_CONNECTOR_CPP}
 )
 target_include_directories(GateServer PRIVATE include gen ${LIB_MYSQL_CONNECTOR_INLCUDE})
+
+# 状态服务器
+add_executable(StatusServer ${STATUS_SERVER_SOURCES} ${PROTO_GEN_SOURCES})
+target_link_libraries(StatusServer PRIVATE
+    Boost::boost
+    nlohmann_json::nlohmann_json
+    fmt::fmt
+    gRPC::grpc++
+    protobuf
+)
+target_include_directories(StatusServer PRIVATE gen)

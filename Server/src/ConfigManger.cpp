@@ -1,120 +1,145 @@
 #include "ConfigManger.h"
-
-#include <cstdint>
-#include <iostream>
-#include <nlohmann/json.hpp>
+#include <fmt/base.h>
+#include <cstdio>
 #include <fstream>
 #include <string>
 
-using json = nlohmann::json;
-
-// 网关服务器 IP, 端口, ASIO io_context 池大小
-constexpr const char* GATE_IP = "0.0.0.0";
-constexpr uint16_t GATE_PORT = 5000;
-constexpr uint32_t ASIO_IO_CONTEXT_POOL_SIZE = 2;
-
-// RPC服务器 IP,端口, 连接池大小
-constexpr const char* EMAIL_RPC_HOST = "127.0.0.1";
-constexpr uint16_t EMAIL_RPC_PORT = 5001;
-constexpr uint32_t RPC_SERVICE_CONN_POOL_SIZE = 2;
-
-// Redis服务器 IP, 端口, 连接池大小
-constexpr const char* REDIS_HOST = "127.0.0.1";
-constexpr uint16_t REDIS_PORT = 6379;
-constexpr uint32_t REDIS_CONN_POOL_SIZE = 2;
-
-// MySQL服务器 IP, 端口, 用户名, 密码, 连接池大小
-constexpr const char* MYSQL_HOST = "127.0.0.1";
-constexpr uint16_t MYSQL_PORT = 3306;
-constexpr const char* MYSQL_USER = "root";
-constexpr const char* MYSQL_PASSWORD = "12345";
-constexpr uint32_t MYSQL_CONN_POOL_SIZE = 2;
-
 void ConfigManager::load(const std::string& path) {
 	std::ifstream ifs(path);
-
-	// 不存在  创建写入默认配置
 	if (!ifs) {
-		createDefaultConfig(path);
-		return;
+		throw std::runtime_error(std::string(path) + " not found");
 	}
 
-	std::string data;
-	data.assign((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
+	json data = json::parse(ifs);
 
-	json j;
-	if (json::accept(data)) {
-		j = json::parse(data);
-	} else {
-		throw std::runtime_error("Invalid json config file");
+	std::string error;
+	if (!checkGateServerConfig(data, error)) {
+		throw std::runtime_error(error + "\nPlease refer to the format below\n" +
+								 DEFAULT_GATE_CONFIG.dump(4));
 	}
 
-	// Gate Server
-	m_gate_ip = j["GateServer"]["gate_ip"].get<std::string>();
-	m_gate_port = j["GateServer"]["gate_port"].get<uint16_t>();
-	m_asio_io_context_pool_size = j["GateServer"]["asio_io_context_pool_size"].get<uint32_t>();
+	// init GateServer
+	m_gate_ip = data["GateServer"]["ip"].get<std::string>();
+	m_gate_port = data["GateServer"]["port"].get<uint16_t>();
+	m_io_context_pool_size = data["GateServer"]["io_context_pool_size"].get<uint16_t>();
 
-	// RPC Server
-	m_rpc_host = j["RPC"]["rpc_host"].get<std::string>();
-	m_rpc_port = j["RPC"]["rpc_port"].get<uint16_t>();
-	m_rpc_service_conn_pool_size = j["RPC"]["rpc_conn_pool_size"].get<uint32_t>();
+	// init MySQL
+	m_mysql_host = data["MySQL"]["host"].get<std::string>();
+	m_mysql_port = data["MySQL"]["port"].get<uint16_t>();
+	m_mysql_user = data["MySQL"]["user"].get<std::string>();
+	m_mysql_password = data["MySQL"]["password"].get<std::string>();
+	m_mysql_db = data["MySQL"]["db"].get<std::string>();
+	m_mysql_conn_pool_size = data["MySQL"]["conn_pool_size"].get<uint16_t>();
 
-	// Redis Server
-	m_redis_host = j["Redis"]["redis_host"].get<std::string>();
-	m_redis_port = j["Redis"]["redis_port"].get<uint16_t>();
-	m_redis_conn_pool_size = j["Redis"]["redis_conn_pool_size"].get<uint32_t>();
+	// init Redis
+	m_redis_host = data["Redis"]["host"].get<std::string>();
+	m_redis_port = data["Redis"]["port"].get<uint16_t>();
+	m_redis_conn_pool_size = data["Redis"]["conn_pool_size"].get<uint16_t>();
 
-	// MySQL Server
-	m_mysql_host = j["MySQL"]["mysql_host"].get<std::string>();
-	m_mysql_port = j["MySQL"]["mysql_port"].get<uint16_t>();
-	m_mysql_user = j["MySQL"]["mysql_user"].get<std::string>();
-	m_mysql_password = j["MySQL"]["mysql_password"].get<std::string>();
-	m_mysql_conn_pool_size = j["MySQL"]["mysql_conn_pool_size"].get<uint32_t>();
+	// init RPC
+	const auto& rpc = data["RPC"];
+	for (const auto& service : rpc) {
+		if (service.contains("EmailService")) {
+			m_rpc_email_host = service["EmailService"]["host"].get<std::string>();
+			m_rpc_email_port = service["EmailService"]["port"].get<uint16_t>();
+			m_rpc_email_service_pool_size =
+				service["EmailService"]["conn_pool_size"].get<uint16_t>();
+		}
+		if (service.contains("StatusService")) {
+			m_rpc_status_host = service["StatusService"]["host"].get<std::string>();
+			m_rpc_status_port = service["StatusService"]["port"].get<uint16_t>();
+			m_rpc_status_service_pool_size =
+				service["StatusService"]["conn_pool_size"].get<uint16_t>();
+		}
+	}
 }
 
-void ConfigManager::createDefaultConfig(const std::string& path) {
+void ConfigManager::genDefaultConfig(const std::string& path) {
 	std::ofstream ofs(path);
+	if (!ofs) {
+		throw std::runtime_error("Failed to create " + path);
+	}
 
-	// Gate Server
-	m_gate_ip = GATE_IP;
-	m_gate_port = GATE_PORT;
-	m_asio_io_context_pool_size = ASIO_IO_CONTEXT_POOL_SIZE;
+	ofs << DEFAULT_GATE_CONFIG.dump(4);
+}
 
-	// RPC Server
-	m_rpc_host = EMAIL_RPC_HOST;
-	m_rpc_port = EMAIL_RPC_PORT;
-	m_rpc_service_conn_pool_size = RPC_SERVICE_CONN_POOL_SIZE;
+bool ConfigManager::checkGateServerConfig(const json& data, std::string& error) {
+	if (!data.contains("GateServer") || !data.contains("MySQL") || !data.contains("RPC") ||
+		!data.contains("Redis")) {
+		error = "required GateServer, MySQL, RPC, Redis Object";
+		return false;
+	}
 
-	// Redis Server
-	m_redis_host = REDIS_HOST;
-	m_redis_port = REDIS_PORT;
-	m_redis_conn_pool_size = REDIS_CONN_POOL_SIZE;
+	// check GateServer
+	const auto& gate = data["GateServer"];
+	if (!gate.contains("ip") || !gate.contains("port") || !gate.contains("io_context_pool_size")) {
+		error = "required GateServer.ip, GateServer.port, io_context_pool_size";
+		fmt::println(stderr, "Your config:\n{}", gate.dump(4));
+		return false;
+	}
 
-	// MySQL Server
-	m_mysql_host = MYSQL_HOST;
-	m_mysql_port = MYSQL_PORT;
-	m_mysql_user = MYSQL_USER;
-	m_mysql_password = MYSQL_PASSWORD;
-	m_mysql_conn_pool_size = MYSQL_CONN_POOL_SIZE;
+	// check MySQL
+	const auto& mysql = data["MySQL"];
+	if (!mysql.contains("host") || !mysql.contains("port") || !mysql.contains("user") ||
+		!mysql.contains("password") || !mysql.contains("db") || !mysql.contains("conn_pool_size")) {
+		error =
+			"required MySQL.host, MySQL.port, MySQL.user, MySQL.password, MySQL.db, "
+			"MySQL.conn_pool_size";
+		fmt::println(stderr, "Your config:\n{}", mysql.dump(4));
+		return false;
+	}
 
-	json j;
-	j["GateServer"]["gate_ip"] = m_gate_ip;
-	j["GateServer"]["gate_port"] = m_gate_port;
-	j["GateServer"]["asio_io_context_pool_size"] = m_asio_io_context_pool_size;
+	// check RPC
+	const auto& redis = data["Redis"];
+	if (!redis.contains("host") || !redis.contains("port") || !redis.contains("conn_pool_size")) {
+		error = "required Redis.host, Redis.port, Redis.conn_pool_size";
+		fmt::println(stderr, "Your config:\n{}", redis.dump(4));
+		return false;
+	}
 
-	j["RPC"]["rpc_host"] = m_rpc_host;
-	j["RPC"]["rpc_port"] = m_rpc_port;
-	j["RPC"]["rpc_conn_pool_size"] = m_rpc_service_conn_pool_size;
+	// check RPC Service
+	const auto& rpc = data["RPC"];
+	if (!rpc.is_array() || rpc.empty()) {
+		error = "required RPC Array";
+		fmt::println(stderr, "Your config:\n{}", rpc.dump(4));
+		return false;
+	}
 
-	j["Redis"]["redis_host"] = m_redis_host;
-	j["Redis"]["redis_port"] = m_redis_port;
-	j["Redis"]["redis_conn_pool_size"] = m_redis_conn_pool_size;
+	bool has_email = false;
+	bool has_status = false;
+	for (const auto& service : rpc) {
+		if (service.contains("EmailService")) {
+			has_email = true;
+			if (!service["EmailService"].contains("host") ||
+				!service["EmailService"].contains("port") ||
+				!service["EmailService"].contains("conn_pool_size")) {
+				error = "required RPC.host, RPC.port, RPC.conn_pool_size";
 
-	j["MySQL"]["mysql_host"] = m_mysql_host;
-	j["MySQL"]["mysql_port"] = m_mysql_port;
-	j["MySQL"]["mysql_user"] = m_mysql_user;
-	j["MySQL"]["mysql_password"] = m_mysql_password;
-	j["MySQL"]["mysql_conn_pool_size"] = m_mysql_conn_pool_size;
+				fmt::println(stderr, "Your config:\n{}", service.dump(4));
 
-	ofs << j.dump(4);
+				return false;
+			}
+		}
+
+		if (service.contains("StatusService")) {
+			has_status = true;
+			if (!service["StatusService"].contains("host") ||
+				!service["StatusService"].contains("port") ||
+				!service["StatusService"].contains("conn_pool_size")) {
+				error = "required RPC.host, RPC.port, RPC.conn_pool_size";
+
+				fmt::println(stderr, "Your config:\n{}", service.dump(4));
+
+				return false;
+			}
+		}
+	}
+
+	if (!has_email || !has_status) {
+		error = "required RPC array contain: EmailService, StatusService Object";
+		fmt::println(stderr, "Your config:\n{}", rpc.dump(4));
+		return false;
+	}
+
+	return true;
 }

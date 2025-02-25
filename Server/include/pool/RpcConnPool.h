@@ -6,7 +6,9 @@
 
 #include <grpcpp/channel.h>
 #include <grpcpp/grpcpp.h>
+#include <grpcpp/support/status.h>
 #include <algorithm>
+#include <csignal>
 #include <nlohmann/json.hpp>
 
 #include <memory>
@@ -21,9 +23,17 @@ using grpc::Channel;
 using grpc::ClientContext;
 using grpc::Status;
 
+// 邮箱验证码服务
+using message::EmailVerifyService;
 using message::EmailVerifyRequest;
 using message::EmailVerifyResponse;
-using message::EmailVerifyService;
+
+// 状态服务
+using message::StatusService;
+using message::ChatServerRequest;
+using message::ChatServerResponse;
+using message::LoginRequest;
+using message::LoginResponse;
 
 // RPC 服务连接池 T: RPC 服务类型
 template <class RpcService>
@@ -51,10 +61,10 @@ public:
 	void init(const std::string& host, uint16_t port, uint32_t pool_size) {
 		if (pool_size <= 0) throw std::invalid_argument("pool_size must be greater than 0");
 
-		pool_size = std::min<uint32_t>(pool_size, MAX_POOL_SIZE);
-
 		// 防止多次初始化
 		if (m_initialized) return;
+
+		pool_size = std::min<uint32_t>(pool_size, MAX_POOL_SIZE);
 
 		std::lock_guard<std::mutex> lock(m_mtx);
 
@@ -147,12 +157,26 @@ public:
 
 	typename RpcService::Stub* operator->() const { return stub.get(); }
 
+	operator bool() const { return stub != nullptr; }
+
 private:
 	std::shared_ptr<typename RpcService::Stub> stub;
 };
 
+// RPC 服务
 namespace RPC {
 
+// 统一错误处理
+json errorResponse(const Status& status, const std::string& rpc_method,
+				   const std::string& reply_msg);
+
+// 获取邮箱验证码
 json getEmailVerifyCode(const std::string& email);
+
+// 获取 ChatServer 信息
+json getChatServerInfo(uint32_t id);
+
+// 登录 ChatServer
+json loginChatServer(uint32_t id, const std::string& token);
 
 } // namespace RPC

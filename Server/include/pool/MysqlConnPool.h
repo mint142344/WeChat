@@ -21,6 +21,9 @@ class MysqlConnPool : public Singleton<MysqlConnPool> {
 	friend class Singleton<MysqlConnPool>;
 
 public:
+	static constexpr uint32_t MAX_POOL_SIZE = 100;
+
+public:
 	MysqlConnPool() = default;
 
 	MysqlConnPool(const MysqlConnPool&) = delete;
