@@ -26,7 +26,7 @@ public:
 						   const std::string& passwd);
 
 	// 登录
-	ErrorCode login(const std::string& username, const std::string& passwd);
+	ErrorCode login(const std::string& username, const std::string& passwd, User& user);
 
 	// 修改密码
 	ErrorCode modifyPasswd(const std::string& username, const std::string& new_passwd);

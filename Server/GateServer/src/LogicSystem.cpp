@@ -187,13 +187,32 @@ void LogicSystem::init() {
 			res.set(http::field::content_type, "application/json");
 
 			// 数据库 登录
-			ErrorCode ec = MysqlService::getInstance()->login(
-				req_json["username"].get<std::string>(), req_json["password"].get<std::string>());
+			User user;
+			ErrorCode ec =
+				MysqlService::getInstance()->login(req_json["username"].get<std::string>(),
+												   req_json["password"].get<std::string>(), user);
 
 			if (ec == ErrorCode::OK) {
-				data = {{"status", "ok"}, {"message", "登录成功"}};
+				// 查询 StatuServer 获取 token
+				json result = RPC::getChatServerInfo(user.id);
+
+				if (result["status"] != "ok") {
+					data = {{"status", "error"}, {"message", result["message"]}};
+				} else {
+					// clang-format off
+					data = {
+						{"status", "ok"}, 
+						{"message", "登录成功"},
+						{"host",result["host"]},
+						{"port",result["port"]},
+						{"token",result["token"]}
+					};
+					// clang-format on
+				}
+
 			} else if (ec == ErrorCode::DB_ERROR) {
 				data = {{"status", "error"}, {"message", "登录失败，服务器内部错误"}};
+
 			} else {
 				data = {{"status", "error"}, {"message", "用户名或密码错误"}};
 			}

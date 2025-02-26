@@ -2,21 +2,21 @@
 #include <fmt/base.h>
 #include <grpcpp/client_context.h>
 #include <grpcpp/support/status.h>
+#include <string>
 
 json RPC::errorResponse(const Status& status, const std::string& rpc_method,
 						const std::string& reply_msg) {
+	std::string message;
+
 	switch (status.error_code()) {
 		case grpc::StatusCode::DEADLINE_EXCEEDED:
-			fmt::println(stderr, "RPC::{} Timeout", rpc_method);
-			return {{"status", "error"}, {"message", "Request timeout"}};
+			message = "Request timeout";
 
 		case grpc::StatusCode::UNAVAILABLE:
-			fmt::println(stderr, "RPC::{} Unavailable", rpc_method);
-			return {{"status", "error"}, {"message", "Service unavailable"}};
+			message = "Service unavailable";
 
 		case grpc::StatusCode::ALREADY_EXISTS:
-			fmt::println(stderr, "RPC::{} Already login", rpc_method);
-			return {{"status", "error"}, {"message", "Already login"}};
+			message = "Already exists";
 
 		default:
 			break;
@@ -24,7 +24,7 @@ json RPC::errorResponse(const Status& status, const std::string& rpc_method,
 
 	fmt::println(stderr, "RPC::{} {}", rpc_method, status.error_message());
 
-	return {{"status", "error"}, {"message", reply_msg}};
+	return {{"status", "error"}, {"message", message.empty() ? reply_msg : message}};
 }
 
 json RPC::getEmailVerifyCode(const std::string& email) {

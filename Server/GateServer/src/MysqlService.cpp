@@ -22,11 +22,10 @@ ErrorCode MysqlService::registerUser(const std::string& username, const std::str
 	return m_user_dao->addUser(user);
 }
 
-ErrorCode MysqlService::login(const std::string& username, const std::string& passwd) {
+ErrorCode MysqlService::login(const std::string& username, const std::string& passwd, User& user) {
 	if (!m_initialized) throw std::runtime_error("MysqlService not initialized");
 
 	// 查找用户
-	User user;
 	ErrorCode ec = m_user_dao->queryByUsername(username, user);
 	if (ec != ErrorCode::OK) return ec;
 
