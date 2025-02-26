@@ -5,15 +5,21 @@
 #include <grpcpp/support/status.h>
 #include <boost/uuid.hpp>
 #include <boost/uuid/uuid.hpp>
+#include <cstddef>
 #include <mutex>
 #include <shared_mutex>
 #include <string>
 
 StatusServiceImpl::StatusServiceImpl(const json& data) {
 	// 读取配置文件
-	for (const auto& server : data["ChatServers"]) {
+	for (size_t i = 0; i < data["ChatServers"].size(); ++i) {
+		const auto& server = data["ChatServers"][i];
 		m_chat_servers.push_back(
 			{server["host"].get<std::string>(), server["port"].get<uint16_t>(), 0});
+
+		// 打印
+		fmt::println("ChatServer{}: {}:{}", i + 1, server["host"].get<std::string>(),
+					 server["port"].get<uint16_t>());
 	}
 }
 
@@ -23,9 +29,16 @@ Status StatusServiceImpl::getChatServerInfo(ServerContext* context, const ChatSe
 	ChatServerInfo* server_info = nullptr;
 
 	{
-		// 读锁 查找负载最小的 ChatServer
+		// 读锁
 		std::shared_lock<std::shared_mutex> lock(m_rw_mtx);
 
+		// 查找是否已登录(禁止一个账号多次登录)
+		if (m_user_tokens.find(req->id()) != m_user_tokens.end()) {
+			res->set_message("Already login");
+			return {grpc::StatusCode::ALREADY_EXISTS, "Already login"};
+		}
+
+		// 查找负载最小的 ChatServer
 		auto it = std::min_element(m_chat_servers.begin(), m_chat_servers.end(),
 								   [](const ChatServerInfo& lhs, const ChatServerInfo& rhs) {
 									   return lhs.conn_cnt < rhs.conn_cnt;
@@ -80,6 +93,8 @@ Status StatusServiceImpl::loginChatServer(ServerContext* context, const LoginReq
 		// 写锁 更新 ChatServer 连接数
 		std::unique_lock<std::shared_mutex> lock(m_rw_mtx);
 		++m_user_pos[req->id()]->conn_cnt;
+		// fmt::println("User{} get {}:{}[{}]", req->id(), m_user_pos[req->id()]->host,
+		// 			 m_user_pos[req->id()]->port, m_user_pos[req->id()]->conn_cnt);
 	}
 
 	return Status::OK;

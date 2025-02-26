@@ -71,3 +71,17 @@ target_link_libraries(test_user_dao PRIVATE
     ${LIB_MYSQL_CONNECTOR_CPP}
 )
 target_include_directories(test_user_dao PRIVATE ${LIB_MYSQL_CONNECTOR_INLCUDE})
+
+# 测试 StatuService
+add_executable(test_status_service
+    test_status_service.cpp
+    ${GATE_SERVER_PATH}/src/RpcService.cpp
+    ${PROTO_GEN_SOURCES}
+)
+add_test(NAME test_status_service COMMAND test_status_service)
+target_link_libraries(test_status_service PRIVATE
+    fmt::fmt
+    nlohmann_json::nlohmann_json
+    gRPC::grpc++ protobuf
+    GTest::GTest GTest::Main
+)

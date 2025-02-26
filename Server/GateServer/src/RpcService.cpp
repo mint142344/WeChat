@@ -5,14 +5,21 @@
 
 json RPC::errorResponse(const Status& status, const std::string& rpc_method,
 						const std::string& reply_msg) {
-	if (status.error_code() == grpc::StatusCode::DEADLINE_EXCEEDED) {
-		fmt::println(stderr, "RPC::{} Timeout", rpc_method);
-		return {{"status", "error"}, {"message", "Request timeout"}};
-	}
+	switch (status.error_code()) {
+		case grpc::StatusCode::DEADLINE_EXCEEDED:
+			fmt::println(stderr, "RPC::{} Timeout", rpc_method);
+			return {{"status", "error"}, {"message", "Request timeout"}};
 
-	if (status.error_code() == grpc::StatusCode::UNAVAILABLE) {
-		fmt::println(stderr, "RPC::{} Unavailable", rpc_method);
-		return {{"status", "error"}, {"message", "Service unavailable"}};
+		case grpc::StatusCode::UNAVAILABLE:
+			fmt::println(stderr, "RPC::{} Unavailable", rpc_method);
+			return {{"status", "error"}, {"message", "Service unavailable"}};
+
+		case grpc::StatusCode::ALREADY_EXISTS:
+			fmt::println(stderr, "RPC::{} Already login", rpc_method);
+			return {{"status", "error"}, {"message", "Already login"}};
+
+		default:
+			break;
 	}
 
 	fmt::println(stderr, "RPC::{} {}", rpc_method, status.error_message());
