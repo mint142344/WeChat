@@ -1,6 +1,6 @@
 #include "LogicSystem.h"
 #include "DAO/ErrorCode.h"
-#include "pool/RpcConnPool.h"
+#include "RpcService.h"
 #include "pool/RedisConnPool.h"
 #include "MysqlService.h"
 

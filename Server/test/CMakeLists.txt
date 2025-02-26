@@ -7,7 +7,7 @@ include_directories(${GATE_SERVER_PATH}/include ${PROTO_GEN_PATH})
 add_executable(test_rpc_pool
     test_rpc_pool.cpp
     ${PROTO_GEN_SOURCES}
-    ${GATE_SERVER_PATH}/src/pool/RpcConnPool.cpp
+    ${GATE_SERVER_PATH}/src/RpcService.cpp
 )
 add_test(NAME test_rpc_pool COMMAND test_rpc_pool)
 

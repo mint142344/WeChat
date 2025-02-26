@@ -6,10 +6,7 @@
 
 #include <grpcpp/channel.h>
 #include <grpcpp/grpcpp.h>
-#include <grpcpp/support/status.h>
 #include <algorithm>
-#include <csignal>
-#include <nlohmann/json.hpp>
 
 #include <memory>
 #include <chrono>
@@ -18,7 +15,6 @@
 #include <mutex>
 #include <condition_variable>
 
-using json = nlohmann::json;
 using grpc::Channel;
 using grpc::ClientContext;
 using grpc::Status;
@@ -162,21 +158,3 @@ public:
 private:
 	std::shared_ptr<typename RpcService::Stub> stub;
 };
-
-// RPC 服务
-namespace RPC {
-
-// 统一错误处理
-json errorResponse(const Status& status, const std::string& rpc_method,
-				   const std::string& reply_msg);
-
-// 获取邮箱验证码
-json getEmailVerifyCode(const std::string& email);
-
-// 获取 ChatServer 信息
-json getChatServerInfo(uint32_t id);
-
-// 登录 ChatServer
-json loginChatServer(uint32_t id, const std::string& token);
-
-} // namespace RPC
