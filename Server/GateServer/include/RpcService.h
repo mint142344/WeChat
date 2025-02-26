@@ -18,7 +18,4 @@ json getEmailVerifyCode(const std::string& email);
 // 获取 ChatServer 信息
 json getChatServerInfo(uint32_t id);
 
-// 登录 ChatServer
-json loginChatServer(uint32_t id, const std::string& token);
-
 } // namespace RPC

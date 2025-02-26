@@ -28,14 +28,14 @@ message ChatServerRequest {
 message ChatServerResponse {
     string host = 1;
     string port = 2;
-    string token = 3;   // 连接到 ChatServer 的 token
+    string token = 3;   // 登录到 ChatServer 的 token
     string message = 4; // error message
 }
 
 
 message LoginRequest {
     uint32 id = 1;
-    string token = 2;
+    string token = 2; // 登录到 ChatServer 的 token
 }
 
 message LoginResponse {
@@ -43,6 +43,9 @@ message LoginResponse {
 }
 
 service StatusService {
+    // 客户端 获取 ChatServer 的信息
     rpc getChatServerInfo (ChatServerRequest) returns (ChatServerResponse);
-    rpc loginChatServer (LoginRequest) returns (LoginResponse);
+
+    // ChatServer 验证 客户端的 登录token
+    rpc verifyToken (LoginRequest) returns (LoginResponse);
 }

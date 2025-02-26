@@ -14,7 +14,7 @@ using namespace boost;
 int main(int argc, char* argv[]) {
 	// argc argv 修改读取配置文件路径
 
-	// 读取配置文件，初始化 ChatServer 信息
+	// 1.读取配置文件，初始化 ChatServer 信息
 	std::ifstream ifs("status_server_config.json");
 	if (!ifs) {
 		throw std::runtime_error("status_server_config.json not found");
@@ -31,11 +31,10 @@ int main(int argc, char* argv[]) {
 						   std::to_string(data["StatusServer"]["port"].get<uint16_t>());
 
 	asio::io_context ioc;
-
 	asio::signal_set sig_set(ioc, SIGINT, SIGTERM);
 
+	// 2.构建 StatusServer
 	StatusServiceImpl status_server(data);
-
 	ServerBuilder builder;
 	builder.AddListeningPort(endpoint, grpc::InsecureServerCredentials());
 	builder.RegisterService(&status_server);
@@ -49,6 +48,7 @@ int main(int argc, char* argv[]) {
 		}
 		// 关闭 StatusServer
 		server->Shutdown();
+		fmt::println("Interrupted by a signal {}", signo);
 	});
 
 	std::thread t([&ioc]() { ioc.run(); });

@@ -203,6 +203,7 @@ void LogicSystem::init() {
 					data = {
 						{"status", "ok"}, 
 						{"message", "登录成功"},
+						{"id",user.id},
 						{"host",result["host"]},
 						{"port",result["port"]},
 						{"token",result["token"]}

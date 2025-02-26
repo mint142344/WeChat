@@ -296,17 +296,17 @@ const char descriptor_table_protodef_message_2eproto[] ABSL_ATTRIBUTE_SECTION_VA
     "oginResponse\022\017\n\007message\030\001 \001(\t2e\n\022EmailVe"
     "rifyService\022O\n\022getEmailVerifyCode\022\033.mess"
     "age.EmailVerifyRequest\032\034.message.EmailVe"
-    "rifyResponse2\237\001\n\rStatusService\022L\n\021getCha"
+    "rifyResponse2\233\001\n\rStatusService\022L\n\021getCha"
     "tServerInfo\022\032.message.ChatServerRequest\032"
-    "\033.message.ChatServerResponse\022@\n\017loginCha"
-    "tServer\022\025.message.LoginRequest\032\026.message"
-    ".LoginResponseb\006proto3"
+    "\033.message.ChatServerResponse\022<\n\013verifyTo"
+    "ken\022\025.message.LoginRequest\032\026.message.Log"
+    "inResponseb\006proto3"
 };
 static ::absl::once_flag descriptor_table_message_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_message_2eproto = {
     false,
     false,
-    582,
+    578,
     descriptor_table_protodef_message_2eproto,
     "message.proto",
     &descriptor_table_message_2eproto_once,
