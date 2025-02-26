@@ -19,36 +19,20 @@ set(LIB_MYSQL_CONNECTOR_INLCUDE /usr/local/mysql/connector-c++-8.0.33/include)
 set(LIB_MYSQL_CONNECTOR_DIR /usr/local/mysql/connector-c++-8.0.33/lib64/debug)
 find_library(LIB_MYSQL_CONNECTOR_CPP NAMES mysqlcppconn PATHS ${LIB_MYSQL_CONNECTOR_DIR} REQUIRED)
 
-file(GLOB_RECURSE SOURCES src/*.cpp)
-file(GLOB_RECURSE PROTO_GEN_SOURCES gen/*.cc)
-file(GLOB_RECURSE STATUS_SERVER_SOURCES StatusService/*.cpp)
+# 设置路径
+set(GATE_SERVER_PATH ${CMAKE_SOURCE_DIR}/GateServer)
+set(STATUS_SERVICE_PATH ${CMAKE_SOURCE_DIR}/StatusService)
+set(PROTO_GEN_PATH ${CMAKE_SOURCE_DIR}/gen)
+
+# proto 生成文件
+file(GLOB_RECURSE PROTO_GEN_SOURCES ${PROTO_GEN_PATH}/*.cc)
 
 # 启动测试
 enable_testing()
 add_subdirectory(test)
 
 # 网关服务器
-add_executable(GateServer ${SOURCES} ${PROTO_GEN_SOURCES})
-target_link_libraries(GateServer PRIVATE
-    Boost::boost
-    nlohmann_json::nlohmann_json
-    fmt::fmt
-    gRPC::grpc++
-    protobuf
-    OpenSSL::SSL
-    OpenSSL::Crypto
-    ${HIREDIS_LIB}
-    ${LIB_MYSQL_CONNECTOR_CPP}
-)
-target_include_directories(GateServer PRIVATE include gen ${LIB_MYSQL_CONNECTOR_INLCUDE})
+add_subdirectory(./GateServer)
 
 # 状态服务器
-add_executable(StatusServer ${STATUS_SERVER_SOURCES} ${PROTO_GEN_SOURCES})
-target_link_libraries(StatusServer PRIVATE
-    Boost::boost
-    nlohmann_json::nlohmann_json
-    fmt::fmt
-    gRPC::grpc++
-    protobuf
-)
-target_include_directories(StatusServer PRIVATE gen)
+add_subdirectory(./StatusService)
