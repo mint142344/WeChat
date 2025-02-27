@@ -1,20 +1,24 @@
-#include "LoginDialog.h"
 #include "Common.h"
-#include "HttpManager.h"
+#include "LoginDialog.h"
+#include "LoadingDialog.h"
 #include "ui_LoginDialog.h"
 #include "ForgetDialog.h"
 #include "RegisterDialog.h"
 #include "DragWidgetFilter.h"
 #include "custom/PasswdLineEdit.h"
+#include "HttpManager.h"
+#include "TcpClient.h"
 
 #include <QGraphicsDropShadowEffect>
 #include <QIcon>
 #include <QAction>
 #include <QJsonObject>
+#include <QMessageBox>
 
 #include <memory>
 
-LoginDialog::LoginDialog(QWidget* parent) : QDialog(parent), ui(new Ui::LoginDialog) {
+LoginDialog::LoginDialog(QWidget* parent)
+	: QDialog(parent), ui(new Ui::LoginDialog), m_loading_dialog(new LoadingDialog(this)) {
 	ui->setupUi(this);
 	initUi();
 
@@ -40,13 +44,31 @@ LoginDialog::LoginDialog(QWidget* parent) : QDialog(parent), ui(new Ui::LoginDia
 		forgetDialog->exec();
 	});
 
-	// 登录请求回调
+	// 关联登录到ChatServer
+	connect(TcpClient::getInstance(), &TcpClient::loggedChatServer,
+			[this](bool success, const QString& message) {
+				m_loading_dialog->close();
+
+				if (success) {
+					accept();
+				} else {
+					setErrorHint(true, message);
+					QMessageBox::warning(this, "登录失败", message);
+				}
+			});
+
+	// 登录 GateServer 请求回调
 	connect(HttpManager::getInstance(), &HttpManager::sig_module_login_finished,
 			[this](RequestType type, const QJsonObject& json) {
 				if (json["status"].toString() == "ok") {
-					// 登录成功
-					qDebug() << "登录成功";
-					accept();
+					auto* tcp = TcpClient::getInstance();
+					tcp->setProperty("id", json["id"].toInt());
+					tcp->setProperty("token", json["token"].toString());
+
+					// 登录 ChatServer
+					tcp->loginToHost(json["host"].toString(), json["port"].toInt());
+					// 阻塞等待登录结果
+					m_loading_dialog->exec();
 				} else {
 					// 登录失败
 					setErrorHint(true, json["message"].toString());
@@ -87,7 +109,7 @@ void LoginDialog::initUi() {
 		passwdLineEdit->setLeadingIcon(":/images/user.png", ":/images/user-focus.png");
 		passwdLineEdit->setAttachment(false, true);
 		passwdLineEdit->setPlaceholderText("请输入用户名");
-		passwdLineEdit->setFont(QFont("Microsoft YaHei", 11));
+		passwdLineEdit->setFont(QFont("Microsoft YaHei", 12));
 	}
 
 	// 密码 leading action
@@ -97,7 +119,7 @@ void LoginDialog::initUi() {
 	ui->lineEdit_password->setInvisbleIcon(":/images/passwd-invisible.png",
 										   ":/images/passwd-invisible-hover.png");
 	ui->lineEdit_password->setAttachment(true, true);
-	ui->lineEdit_password->setFont(QFont("Microsoft YaHei", 11));
+	ui->lineEdit_password->setFont(QFont("Microsoft YaHei", 12));
 
 	ui->comboBox_username->setFocus();
 }

@@ -3,6 +3,8 @@
 
 #include <QDialog>
 
+class LoadingDialog;
+
 namespace Ui {
 class LoginDialog;
 }
@@ -25,6 +27,7 @@ private:
 
 private:
 	Ui::LoginDialog* ui;
+	LoadingDialog* m_loading_dialog;
 };
 
 #endif // LOGINDIALOG_H
