@@ -1,5 +1,5 @@
 #include "ConfigManger.h"
-#include "pool/RpcConnPool.hpp"
+#include "RpcService.h"
 #include "pool/IoContextPool.h"
 #include "pool/MysqlConnPool.h"
 #include "pool/RedisConnPool.h"

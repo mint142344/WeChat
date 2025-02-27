@@ -1,7 +1,7 @@
 #include "DAO/ErrorCode.h"
 #include "pool/MysqlConnPool.h"
-#include "DAO/user.h"
 #include "DAO/mysql/MysqlUserDao.h"
+#include "DAO/user.h"
 
 #include <jdbc/cppconn/statement.h>
 #include <gtest/gtest.h>

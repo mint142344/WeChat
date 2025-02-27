@@ -11,4 +11,9 @@ target_link_libraries(GateServer PRIVATE
     ${HIREDIS_LIB}
     ${LIB_MYSQL_CONNECTOR_CPP}
 )
-target_include_directories(GateServer PRIVATE include ${PROTO_GEN_PATH} ${LIB_MYSQL_CONNECTOR_INLCUDE})
+target_include_directories(GateServer PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}
+    ${PROTO_GEN_PATH}
+    ${LIB_MYSQL_CONNECTOR_INLCUDE}
+)

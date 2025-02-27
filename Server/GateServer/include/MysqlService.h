@@ -1,7 +1,7 @@
 #pragma once
 
 #include "DAO/user.h"
-#include "Singleton.hpp"
+#include "Common/Singleton.hpp"
 #include "DAO/ErrorCode.h"
 
 #include <memory>

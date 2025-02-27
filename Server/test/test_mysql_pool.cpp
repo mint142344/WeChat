@@ -1,6 +1,7 @@
 #include "jdbc/cppconn/resultset.h"
 #include "jdbc/cppconn/statement.h"
 #include "pool/MysqlConnPool.h"
+
 #include <gtest/gtest.h>
 #include <jdbc/mysql_connection.h>
 #include <jdbc/mysql_driver.h>

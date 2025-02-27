@@ -1,5 +1,5 @@
 #pragma once
-#include "Common.h"
+#include "Common/net.h"
 #include <memory>
 
 class HttpConnection : public std::enable_shared_from_this<HttpConnection> {

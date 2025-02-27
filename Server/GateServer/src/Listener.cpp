@@ -2,8 +2,6 @@
 #include "HttpConnection.h"
 #include "pool/IoContextPool.h"
 
-#include <fmt/base.h>
-
 Listener::Listener(net::io_context& ioc, const tcp::endpoint& endpoint)
 	: m_ioc(ioc), m_acceptor(ioc, endpoint) {}
 

@@ -1,17 +1,18 @@
 # 查找库
 find_package(GTest REQUIRED)
 
-include_directories(${GATE_SERVER_PATH}/include ${PROTO_GEN_PATH})
+# 统一包含目录
+include_directories(${PROTO_GEN_PATH} ${CMAKE_SOURCE_DIR})
 
 # 测试 grpc 连接池
-add_executable(test_rpc_pool
-    test_rpc_pool.cpp
+add_executable(test_email_service
+    test_email_service.cpp
     ${PROTO_GEN_SOURCES}
     ${GATE_SERVER_PATH}/src/RpcService.cpp
 )
-add_test(NAME test_rpc_pool COMMAND test_rpc_pool)
-
-target_link_libraries(test_rpc_pool PRIVATE
+add_test(NAME test_email_service COMMAND test_email_service)
+target_include_directories(test_email_service PRIVATE ${GATE_SERVER_PATH}/include)
+target_link_libraries(test_email_service PRIVATE
     fmt::fmt
     nlohmann_json::nlohmann_json
     gRPC::grpc++ protobuf
@@ -24,6 +25,7 @@ add_executable(test_io_context_pool
     ${GATE_SERVER_PATH}/src/pool/IoContextPool.cpp
 )
 add_test(NAME test_io_context_pool COMMAND test_io_context_pool)
+target_include_directories(test_io_context_pool PRIVATE ${GATE_SERVER_PATH}/include)
 target_link_libraries(test_io_context_pool PRIVATE
     fmt::fmt
     Boost::boost
@@ -36,6 +38,7 @@ add_executable(test_redis_pool
     ${GATE_SERVER_PATH}/src/pool/RedisConnPool.cpp
 )
 add_test(NAME test_redis_pool COMMAND test_redis_pool)
+target_include_directories(test_redis_pool PRIVATE ${GATE_SERVER_PATH}/include)
 target_link_libraries(test_redis_pool PRIVATE
     fmt::fmt
     GTest::GTest GTest::Main
@@ -48,6 +51,7 @@ add_executable(test_mysql_pool
     ${GATE_SERVER_PATH}/src/pool/MysqlConnPool.cpp
 )
 add_test(NAME test_mysql_pool COMMAND test_mysql_pool)
+target_include_directories(test_mysql_pool PRIVATE ${GATE_SERVER_PATH}/include)
 target_link_libraries(test_mysql_pool PRIVATE
     fmt::fmt
     GTest::GTest GTest::Main
@@ -64,6 +68,7 @@ add_executable(test_user_dao
     ${GATE_SERVER_PATH}/include/DAO/user.h
 )
 add_test(NAME test_user_dao COMMAND test_user_dao)
+target_include_directories(test_user_dao PRIVATE ${GATE_SERVER_PATH}/include)
 target_link_libraries(test_user_dao PRIVATE
     fmt::fmt
     GTest::GTest GTest::Main
@@ -76,9 +81,11 @@ target_include_directories(test_user_dao PRIVATE ${LIB_MYSQL_CONNECTOR_INLCUDE})
 add_executable(test_status_service
     test_status_service.cpp
     ${GATE_SERVER_PATH}/src/RpcService.cpp
+    ${CHAT_SERVER_PATH}/src/RpcService.cpp
     ${PROTO_GEN_SOURCES}
 )
 add_test(NAME test_status_service COMMAND test_status_service)
+target_include_directories(test_status_service PRIVATE ${GATE_SERVER_PATH}/include ${CHAT_SERVER_PATH}/include)
 target_link_libraries(test_status_service PRIVATE
     fmt::fmt
     nlohmann_json::nlohmann_json

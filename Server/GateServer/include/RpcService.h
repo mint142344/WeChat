@@ -1,16 +1,21 @@
 #pragma once
 
-#include "pool/RpcConnPool.hpp"
+#include "Common/RpcConnPool.hpp"
+#include "message.pb.h"
+#include "message.grpc.pb.h"
 
-#include <nlohmann/json.hpp>
-using json = nlohmann::json;
+// 邮箱验证码服务
+using message::EmailVerifyService;
+using message::EmailVerifyRequest;
+using message::EmailVerifyResponse;
+
+// 状态服务
+using message::StatusService;
+using message::ChatServerRequest;
+using message::ChatServerResponse;
 
 // RPC 服务
 namespace RPC {
-
-// 统一错误处理
-json errorResponse(const Status& status, const std::string& rpc_method,
-				   const std::string& reply_msg);
 
 // 获取邮箱验证码
 json getEmailVerifyCode(const std::string& email);

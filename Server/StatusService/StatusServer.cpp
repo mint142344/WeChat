@@ -24,6 +24,7 @@ StatusServiceImpl::StatusServiceImpl(const json& data) {
 
 	// 启动 清理线程
 	m_clean_thread = std::thread([this] {
+		fmt::println("Clean thread started");
 		std::unique_lock<std::mutex> lock(m_mtx);
 
 		while (m_running) {
@@ -93,9 +94,9 @@ Status StatusServiceImpl::getChatServerInfo(ServerContext* context, const ChatSe
 
 Status StatusServiceImpl::verifyToken(ServerContext* context, const LoginRequest* req,
 									  LoginResponse* res) {
-	// 验证 token
 	std::unique_lock<std::mutex> lock(m_mtx);
 
+	// 查找 token
 	auto it = m_users.find(req->id());
 
 	if (it == m_users.end()) {
@@ -103,7 +104,7 @@ Status StatusServiceImpl::verifyToken(ServerContext* context, const LoginRequest
 		return {grpc::StatusCode::NOT_FOUND, "No token"};
 	}
 
-	// 存在 token
+	// 验证失败 erase user
 	auto cur = std::chrono::steady_clock::now();
 	if (!it->second.is_verify && cur - it->second.create_time > VERIFY_TIMEOUT) {
 		m_users.erase(it);

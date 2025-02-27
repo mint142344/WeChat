@@ -22,6 +22,7 @@ find_library(LIB_MYSQL_CONNECTOR_CPP NAMES mysqlcppconn PATHS ${LIB_MYSQL_CONNEC
 # 设置路径
 set(GATE_SERVER_PATH ${CMAKE_SOURCE_DIR}/GateServer)
 set(STATUS_SERVICE_PATH ${CMAKE_SOURCE_DIR}/StatusService)
+set(CHAT_SERVER_PATH ${CMAKE_SOURCE_DIR}/ChatServer)
 set(PROTO_GEN_PATH ${CMAKE_SOURCE_DIR}/gen)
 
 # proto 生成文件
@@ -36,3 +37,6 @@ add_subdirectory(./GateServer)
 
 # 状态服务器
 add_subdirectory(./StatusService)
+
+# 聊天服务器
+add_subdirectory(./ChatServer)

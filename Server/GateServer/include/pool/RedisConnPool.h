@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Singleton.hpp"
+#include "Common/Singleton.hpp"
 
 #include <hiredis/hiredis.h>
 #include <chrono>

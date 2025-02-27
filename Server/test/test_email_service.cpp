@@ -1,4 +1,6 @@
-#include "pool/RpcConnPool.hpp"
+#include "Common/RpcConnPool.hpp"
+#include "GateServer/include/RpcService.h"
+
 #include <grpcpp/client_context.h>
 #include <grpcpp/support/status.h>
 #include <gtest/gtest.h>

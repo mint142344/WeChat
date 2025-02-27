@@ -9,4 +9,7 @@ target_link_libraries(StatusServer PRIVATE
     nlohmann_json::nlohmann_json
     gRPC::grpc++ protobuf
 )
-target_include_directories(StatusServer PRIVATE ${PROTO_GEN_PATH})
+target_include_directories(StatusServer PRIVATE
+    ${CMAKE_SOURCE_DIR}
+    ${PROTO_GEN_PATH}
+)

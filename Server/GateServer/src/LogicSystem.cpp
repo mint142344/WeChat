@@ -4,8 +4,6 @@
 #include "pool/RedisConnPool.h"
 #include "MysqlService.h"
 
-#include <fmt/base.h>
-#include <boost/beast/core/ostream.hpp>
 #include <exception>
 #include <nlohmann/json.hpp>
 #include <string>

@@ -1,12 +1,11 @@
 #pragma once
 
 #include "Singleton.hpp"
-#include "message.pb.h"
-#include "message.grpc.pb.h"
 
 #include <grpcpp/channel.h>
 #include <grpcpp/grpcpp.h>
-#include <algorithm>
+#include <nlohmann/json.hpp>
+#include <fmt/core.h>
 
 #include <memory>
 #include <chrono>
@@ -15,21 +14,10 @@
 #include <mutex>
 #include <condition_variable>
 
+using json = nlohmann::json;
 using grpc::Channel;
 using grpc::ClientContext;
 using grpc::Status;
-
-// 邮箱验证码服务
-using message::EmailVerifyService;
-using message::EmailVerifyRequest;
-using message::EmailVerifyResponse;
-
-// 状态服务
-using message::StatusService;
-using message::ChatServerRequest;
-using message::ChatServerResponse;
-using message::LoginRequest;
-using message::LoginResponse;
 
 // RPC 服务连接池 T: RPC 服务类型
 template <class RpcService>
@@ -158,3 +146,31 @@ public:
 private:
 	std::shared_ptr<typename RpcService::Stub> stub;
 };
+
+namespace RPC {
+
+// 统一错误处理
+inline json errorResponse(const Status& status, const std::string& rpc_method,
+						  const std::string& reply_msg) {
+	std::string message;
+
+	switch (status.error_code()) {
+		case grpc::StatusCode::DEADLINE_EXCEEDED:
+			message = "Request timeout";
+
+		case grpc::StatusCode::UNAVAILABLE:
+			message = "Service unavailable";
+
+		case grpc::StatusCode::ALREADY_EXISTS:
+			message = "Already exists";
+
+		default:
+			break;
+	}
+
+	fmt::println(stderr, "RPC::{} {}", rpc_method, status.error_message());
+
+	return {{"status", "error"}, {"message", message.empty() ? reply_msg : message}};
+}
+
+} // namespace RPC

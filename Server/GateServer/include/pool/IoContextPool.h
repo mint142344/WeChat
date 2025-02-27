@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Common.h"
-#include "Singleton.hpp"
+#include "Common/net.h"
+#include "Common/Singleton.hpp"
 
 #include <memory>
 #include <thread>
