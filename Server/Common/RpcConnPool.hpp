@@ -54,6 +54,11 @@ public:
 
 		std::shared_ptr<Channel> channel = grpc::CreateChannel(host + ":" + std::to_string(port),
 															   grpc::InsecureChannelCredentials());
+		// 检查 是否可以连接
+		if (!channel->WaitForConnected(std::chrono::system_clock::now() +
+									   std::chrono::seconds{5})) {
+			throw std::runtime_error("Failed to connect to " + host + ":" + std::to_string(port));
+		}
 
 		for (int i = 0; i < pool_size; ++i) {
 			std::unique_ptr<typename RpcService::Stub> stub = RpcService::NewStub(channel);
