@@ -24,9 +24,13 @@ set(GATE_SERVER_PATH ${CMAKE_SOURCE_DIR}/GateServer)
 set(STATUS_SERVICE_PATH ${CMAKE_SOURCE_DIR}/StatusService)
 set(CHAT_SERVER_PATH ${CMAKE_SOURCE_DIR}/ChatServer)
 set(PROTO_GEN_PATH ${CMAKE_SOURCE_DIR}/gen)
+set(COMMON_SRC_PATH ${CMAKE_SOURCE_DIR}/Common/src)
 
 # proto 生成文件
 file(GLOB_RECURSE PROTO_GEN_SOURCES ${PROTO_GEN_PATH}/*.cc)
+
+
+include_directories(${PROTO_GEN_PATH} ${CMAKE_SOURCE_DIR}/Common/include)
 
 # 启动测试
 enable_testing()

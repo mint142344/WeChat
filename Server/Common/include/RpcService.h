@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Common/RpcConnPool.hpp"
+#include "pool/RpcConnPool.hpp"
 #include "message.pb.h"
 #include "message.grpc.pb.h"
 
@@ -14,7 +14,12 @@ using message::StatusService;
 using message::ChatServerRequest;
 using message::ChatServerResponse;
 
-// RPC 服务
+// 状态服务
+using message::StatusService;
+using message::LoginRequest;
+using message::LoginResponse;
+
+// RPC 服务 客户端
 namespace RPC {
 
 // 获取邮箱验证码
@@ -22,5 +27,8 @@ json getEmailVerifyCode(const std::string& email);
 
 // 获取 ChatServer 信息
 json getChatServerInfo(uint32_t id);
+
+// ChatServer 验证 Token
+json verifyToken(uint32_t id, const std::string& token);
 
 } // namespace RPC

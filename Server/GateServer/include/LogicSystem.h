@@ -1,6 +1,6 @@
 #pragma once
-#include "Common/net.h"
-#include "Common/Singleton.hpp"
+#include "net.h"
+#include "Singleton.hpp"
 
 #include <functional>
 #include <map>

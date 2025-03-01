@@ -1,11 +1,13 @@
 #include "ConfigManger.h"
-#include "RpcService.h"
+#include "LogicSystem.h"
+#include "Listener.h"
+
 #include "pool/IoContextPool.h"
 #include "pool/MysqlConnPool.h"
 #include "pool/RedisConnPool.h"
-#include "LogicSystem.h"
+
 #include "MysqlService.h"
-#include "Listener.h"
+#include "RpcService.h"
 
 #include <fmt/base.h>
 #include <csignal>
@@ -26,30 +28,28 @@ int main(int argc, char* argv[]) {
 		ConfigManager::getInstance()->load();
 		const ConfigManager* config = ConfigManager::getInstance();
 
-		tcp::endpoint ep({net::ip::make_address(config->m_gate_ip), config->m_gate_port});
+		tcp::endpoint ep({net::ip::make_address(config->gateIp()), config->gatePort()});
 
 		// 2.start io_context pool
-		IoContextPool::getInstance()->start(config->m_io_context_pool_size);
+		IoContextPool::getInstance()->start(config->ioContextPoolSize());
 
 		// 3.init logic system
 		LogicSystem::getInstance()->init();
 
 		// 4.init RPC pool
 		RpcServiceConnPool<EmailVerifyService>::getInstance()->init(
-			config->m_rpc_email_host, config->m_rpc_email_port,
-			config->m_rpc_email_service_pool_size);
+			config->rpcEmailHost(), config->rpcEmailPort(), config->rpcEmailServicePoolSize());
 		RpcServiceConnPool<StatusService>::getInstance()->init(
-			config->m_rpc_status_host, config->m_rpc_status_port,
-			config->m_rpc_status_service_pool_size);
+			config->rpcStatusHost(), config->rpcStatusPort(), config->rpcStatusServicePoolSize());
 
 		// 5.init redis conn pool
-		RedisConnPool::getInstance()->init(config->m_redis_host, config->m_redis_port,
-										   config->m_redis_conn_pool_size);
+		RedisConnPool::getInstance()->init(config->redisHost(), config->redisPort(),
+										   config->redisConnPoolSize());
 
 		// 6.init database conn pool
-		MysqlConnPool::getInstance()->init(config->m_mysql_host, config->m_mysql_port,
-										   config->m_mysql_user, config->m_mysql_password,
-										   config->m_mysql_db, config->m_mysql_conn_pool_size);
+		MysqlConnPool::getInstance()->init(config->mysqlHost(), config->mysqlPort(),
+										   config->mysqlUser(), config->mysqlPassword(),
+										   config->mysqlDb(), config->mysqlConnPoolSize());
 		// 7.init mysql service
 		MysqlService::getInstance()->init();
 

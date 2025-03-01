@@ -1,12 +1,13 @@
 #pragma once
 
-#include "Common/Singleton.hpp"
+#include "Singleton.hpp"
 
 #include <string>
 #include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
 
+// RPC 数组 0: EmailService, 1: StatusService
 // clang-format off
 inline const json DEFAULT_GATE_CONFIG = {
         {"GateServer", {
@@ -74,36 +75,39 @@ public:
 	// 生成默认配置文件
 	static void genDefaultConfig(const std::string& path = CONFIG_PATH);
 
+	// GateServer
+	std::string gateIp() const;
+	uint16_t gatePort() const;
+	uint16_t ioContextPoolSize() const;
+
+	// RPC 邮箱服务
+	std::string rpcEmailHost() const;
+	uint16_t rpcEmailPort() const;
+	uint16_t rpcEmailServicePoolSize() const;
+
+	// RPC 状态服务
+	std::string rpcStatusHost() const;
+	uint16_t rpcStatusPort() const;
+	uint16_t rpcStatusServicePoolSize() const;
+
+	// Redis
+	std::string redisHost() const;
+	uint16_t redisPort() const;
+	uint16_t redisConnPoolSize() const;
+	
+	// Mysql
+	std::string mysqlHost() const;
+	uint16_t mysqlPort() const;
+	std::string mysqlUser() const;
+	std::string mysqlPassword() const;
+	std::string mysqlDb() const;
+	uint16_t mysqlConnPoolSize() const;
+
 private:
 	// 检查配置文件格式
 	static bool checkGateServerConfig(const json& data, std::string& error);
 
 public:
-	// GateServer
-	std::string m_gate_ip;
-	uint16_t m_gate_port{};
-	uint16_t m_io_context_pool_size{};
-
-	// RPC 邮箱服务
-	std::string m_rpc_email_host;
-	uint16_t m_rpc_email_port{};
-	uint16_t m_rpc_email_service_pool_size{};
-
-	// RPC 状态服务
-	std::string m_rpc_status_host;
-	uint16_t m_rpc_status_port{};
-	uint16_t m_rpc_status_service_pool_size{};
-
-	// Redis
-	std::string m_redis_host;
-	uint16_t m_redis_port{};
-	uint16_t m_redis_conn_pool_size{};
-
-	// Mysql
-	std::string m_mysql_host;
-	uint16_t m_mysql_port{};
-	std::string m_mysql_user;
-	std::string m_mysql_password;
-	std::string m_mysql_db;
-	uint16_t m_mysql_conn_pool_size{};
+	// 服务器配置
+	json m_config;
 };

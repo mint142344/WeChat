@@ -1,5 +1,4 @@
-#include "GateServer/include/RpcService.h"
-#include "ChatServer/include/RpcService.h"
+#include "RpcService.h"
 #include <gtest/gtest.h>
 #include <chrono>
 #include <thread>

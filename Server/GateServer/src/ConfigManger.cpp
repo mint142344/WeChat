@@ -1,6 +1,5 @@
 #include "ConfigManger.h"
 #include <fmt/base.h>
-#include <cstdio>
 #include <fstream>
 #include <string>
 
@@ -10,48 +9,15 @@ void ConfigManager::load(const std::string& path) {
 		throw std::runtime_error(std::string(path) + " not found");
 	}
 
-	json data = json::parse(ifs);
+	m_config = json::parse(ifs);
 
 	std::string error;
-	if (!checkGateServerConfig(data, error)) {
+	if (!checkGateServerConfig(m_config, error)) {
 		throw std::runtime_error(error + "\nPlease refer to the format below\n" +
 								 DEFAULT_GATE_CONFIG.dump(4));
 	}
 
-	// init GateServer
-	m_gate_ip = data["GateServer"]["ip"].get<std::string>();
-	m_gate_port = data["GateServer"]["port"].get<uint16_t>();
-	m_io_context_pool_size = data["GateServer"]["io_context_pool_size"].get<uint16_t>();
-
-	// init MySQL
-	m_mysql_host = data["MySQL"]["host"].get<std::string>();
-	m_mysql_port = data["MySQL"]["port"].get<uint16_t>();
-	m_mysql_user = data["MySQL"]["user"].get<std::string>();
-	m_mysql_password = data["MySQL"]["password"].get<std::string>();
-	m_mysql_db = data["MySQL"]["db"].get<std::string>();
-	m_mysql_conn_pool_size = data["MySQL"]["conn_pool_size"].get<uint16_t>();
-
-	// init Redis
-	m_redis_host = data["Redis"]["host"].get<std::string>();
-	m_redis_port = data["Redis"]["port"].get<uint16_t>();
-	m_redis_conn_pool_size = data["Redis"]["conn_pool_size"].get<uint16_t>();
-
-	// init RPC
-	const auto& rpc = data["RPC"];
-	for (const auto& service : rpc) {
-		if (service.contains("EmailService")) {
-			m_rpc_email_host = service["EmailService"]["host"].get<std::string>();
-			m_rpc_email_port = service["EmailService"]["port"].get<uint16_t>();
-			m_rpc_email_service_pool_size =
-				service["EmailService"]["conn_pool_size"].get<uint16_t>();
-		}
-		if (service.contains("StatusService")) {
-			m_rpc_status_host = service["StatusService"]["host"].get<std::string>();
-			m_rpc_status_port = service["StatusService"]["port"].get<uint16_t>();
-			m_rpc_status_service_pool_size =
-				service["StatusService"]["conn_pool_size"].get<uint16_t>();
-		}
-	}
+	fmt::println("Load {} success", path);
 }
 
 void ConfigManager::genDefaultConfig(const std::string& path) {
@@ -61,6 +27,70 @@ void ConfigManager::genDefaultConfig(const std::string& path) {
 	}
 
 	ofs << DEFAULT_GATE_CONFIG.dump(4);
+}
+
+std::string ConfigManager::gateIp() const {
+	return m_config["GateServer"]["ip"].get<std::string>();
+}
+
+uint16_t ConfigManager::gatePort() const { return m_config["GateServer"]["port"].get<uint16_t>(); }
+
+uint16_t ConfigManager::ioContextPoolSize() const {
+	return m_config["GateServer"]["io_context_pool_size"].get<uint16_t>();
+}
+
+std::string ConfigManager::rpcEmailHost() const {
+	return m_config["RPC"][0]["EmailService"]["host"].get<std::string>();
+}
+
+uint16_t ConfigManager::rpcEmailPort() const {
+	return m_config["RPC"][0]["EmailService"]["port"].get<uint16_t>();
+}
+
+uint16_t ConfigManager::rpcEmailServicePoolSize() const {
+	return m_config["RPC"][0]["EmailService"]["conn_pool_size"].get<uint16_t>();
+}
+
+std::string ConfigManager::rpcStatusHost() const {
+	return m_config["RPC"][1]["StatusService"]["host"].get<std::string>();
+}
+
+uint16_t ConfigManager::rpcStatusPort() const {
+	return m_config["RPC"][1]["StatusService"]["port"].get<uint16_t>();
+}
+
+uint16_t ConfigManager::rpcStatusServicePoolSize() const {
+	return m_config["RPC"][1]["StatusService"]["conn_pool_size"].get<uint16_t>();
+}
+
+std::string ConfigManager::redisHost() const {
+	return m_config["Redis"]["host"].get<std::string>();
+}
+
+uint16_t ConfigManager::redisPort() const { return m_config["Redis"]["port"].get<uint16_t>(); }
+
+uint16_t ConfigManager::redisConnPoolSize() const {
+	return m_config["Redis"]["conn_pool_size"].get<uint16_t>();
+}
+
+std::string ConfigManager::mysqlHost() const {
+	return m_config["MySQL"]["host"].get<std::string>();
+}
+
+uint16_t ConfigManager::mysqlPort() const { return m_config["MySQL"]["port"].get<uint16_t>(); }
+
+std::string ConfigManager::mysqlUser() const {
+	return m_config["MySQL"]["user"].get<std::string>();
+}
+
+std::string ConfigManager::mysqlPassword() const {
+	return m_config["MySQL"]["password"].get<std::string>();
+}
+
+std::string ConfigManager::mysqlDb() const { return m_config["MySQL"]["db"].get<std::string>(); }
+
+uint16_t ConfigManager::mysqlConnPoolSize() const {
+	return m_config["MySQL"]["conn_pool_size"].get<uint16_t>();
 }
 
 bool ConfigManager::checkGateServerConfig(const json& data, std::string& error) {

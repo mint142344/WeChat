@@ -4,8 +4,7 @@ file(GLOB_RECURSE SOURCES src/*.cpp)
 add_executable(ChatServer ${SOURCES} ${PROTO_GEN_SOURCES})
 target_link_libraries(ChatServer PRIVATE
     fmt::fmt
-
-    # Boost::boost
+    Boost::boost
     nlohmann_json::nlohmann_json
     gRPC::grpc++ protobuf
 
@@ -15,6 +14,5 @@ target_link_libraries(ChatServer PRIVATE
 )
 target_include_directories(ChatServer PRIVATE
     ${CMAKE_SOURCE_DIR}
-    ${PROTO_GEN_PATH}
     ./include
 )

@@ -17,6 +17,8 @@ StatusServiceImpl::StatusServiceImpl(const json& data) {
 		m_chat_servers.push_back(
 			{server["host"].get<std::string>(), server["port"].get<uint16_t>(), 0});
 
+		// 连接 ChatServer 发送 PING 包，检查是否可以连接
+
 		// 打印
 		fmt::println("ChatServer{}: {}:{}", i + 1, server["host"].get<std::string>(),
 					 server["port"].get<uint16_t>());

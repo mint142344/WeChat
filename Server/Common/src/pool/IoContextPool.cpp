@@ -1,10 +1,12 @@
-#include "pool/IoContextPool.h"
+#include "../../include/pool/IoContextPool.h"
 
 #include <algorithm>
 
 IoContextPool::~IoContextPool() { stop(); }
 
 void IoContextPool::start(uint32_t pool_size) {
+	if (m_started) throw std::runtime_error("IoContextPool::start: already started");
+
 	m_pool_size = pool_size;
 
 	if (m_pool_size <= 0)
@@ -12,7 +14,7 @@ void IoContextPool::start(uint32_t pool_size) {
 
 	m_pool_size = std::min(m_pool_size, std::thread::hardware_concurrency());
 
-	for (int i = 0; i < m_pool_size; ++i) {
+	for (size_t i = 0; i < m_pool_size; ++i) {
 		m_contexts.emplace_back(std::make_unique<net::io_context>());
 		// work_guard 绑定 io_context
 		m_work_guards.emplace_back(net::make_work_guard(*m_contexts[i]));
@@ -45,6 +47,7 @@ void IoContextPool::stop() {
 	m_contexts.clear();
 	m_pool_size = 0;
 	m_next_index = 0;
+	m_started = false;
 }
 
 net::io_context& IoContextPool::getIoContext() { return *m_contexts[m_next_index++ % m_pool_size]; }

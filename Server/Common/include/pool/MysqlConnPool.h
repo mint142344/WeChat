@@ -9,7 +9,7 @@
 #include <deque>
 #include <mutex>
 
-#include "Common/Singleton.hpp"
+#include "Singleton.hpp"
 
 using MysqlConnPtr = std::shared_ptr<sql::Connection>;
 using StmtPtr = std::unique_ptr<sql::Statement>;

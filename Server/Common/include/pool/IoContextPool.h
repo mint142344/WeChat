@@ -1,10 +1,11 @@
 #pragma once
 
-#include "Common/net.h"
-#include "Common/Singleton.hpp"
+#include "net.h"
+#include "Singleton.hpp"
 
 #include <memory>
 #include <thread>
+#include <atomic>
 
 class IoContextPool : public Singleton<IoContextPool> {
 	friend class Singleton<IoContextPool>;
@@ -34,4 +35,6 @@ private:
 
 	uint32_t m_pool_size = 0;
 	uint32_t m_next_index = 0;
+
+	std::atomic<bool> m_started{false};
 };

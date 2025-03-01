@@ -1,4 +1,4 @@
-#include "pool/MysqlConnPool.h"
+#include "../../include/pool/MysqlConnPool.h"
 
 #include <fmt/base.h>
 #include <jdbc/cppconn/connection.h>

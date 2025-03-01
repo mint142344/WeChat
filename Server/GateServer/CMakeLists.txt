@@ -1,7 +1,13 @@
 
 file(GLOB_RECURSE SOURCES src/*.cpp)
+file(GLOB_RECURSE COMMON_SRCS ${CMAKE_SOURCE_DIR}/Common/src/*.cpp)
 
-add_executable(GateServer ${SOURCES} ${PROTO_GEN_SOURCES})
+add_executable(GateServer 
+    ${SOURCES} 
+    ${PROTO_GEN_SOURCES}
+    ${COMMON_SRCS}
+)
+
 target_link_libraries(GateServer PRIVATE
     fmt::fmt
     Boost::boost
@@ -13,7 +19,6 @@ target_link_libraries(GateServer PRIVATE
 )
 target_include_directories(GateServer PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_SOURCE_DIR}
     ${PROTO_GEN_PATH}
     ${LIB_MYSQL_CONNECTOR_INLCUDE}
 )

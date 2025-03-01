@@ -12,6 +12,8 @@ Checks: >
 
   bugpropr-*,
   performance-*,
+  -performance-enum-size,
+
   portability-*,
 
   cppcoreguidelines-*,
