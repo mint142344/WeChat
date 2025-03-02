@@ -30,7 +30,7 @@ StatusServiceImpl::StatusServiceImpl(net::io_context& ioc, const json& data) : m
 		}
 
 		// 打印
-		fmt::println("ChatServer{}: {}:{}", i + 1, server["host"].get<std::string>(),
+		fmt::println("ChatServer[{}]: {}:{}", i, server["host"].get<std::string>(),
 					 server["port"].get<uint16_t>());
 	}
 

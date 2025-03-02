@@ -1,31 +1,28 @@
 #pragma once
 
-#include "net_common.h"
-
 #include <algorithm>
+#include <stdexcept>
+#include <iostream>
 #include <vector>
+#include <memory>
+#include <cstring>
 
-// 消息头, T: 消息 ID 枚举类
-template <class MSG_ID>
-struct message_header {
-	MSG_ID id{};
-	uint32_t size = 0; // body size
-};
+#include "../message.h"
 
 // 存储要发送的消息
 template <class T>
-struct message {
+struct Message {
 private:
-	message_header<T> m_header{};
+	MessageHeader<T> m_header{};
 	std::vector<uint8_t> m_body;
 
 public:
-	message() {
+	Message() {
 		static_assert(std::is_enum_v<T>, "T must be enum class");
 		m_body.reserve(1024);
 	}
 
-	message(T id) : m_header({id, 0}) {
+	Message(T id) : m_header({id, 0}) {
 		static_assert(std::is_enum_v<T>, "T must be enum class");
 		m_body.reserve(1024);
 	}
@@ -47,8 +44,8 @@ public:
 public:
 	// Note:POD data, push any trivial data to message
 	template <class DataType>
-	friend message<T>& operator<<(message& msg, const DataType& data) {
-		static_assert(std::is_standard_layout<DataType>::value,
+	friend Message<T>& operator<<(Message& msg, const DataType& data) {
+		static_assert(std::is_standard_layout_v<DataType>,
 					  "Data is too complex to be pushed into vector");
 
 		size_t old_size = msg.m_body.size();
@@ -63,7 +60,7 @@ public:
 
 	// Note:POD data, pop any trivial data from message
 	template <class DataType>
-	friend message<T>& operator>>(message& msg, DataType& data) {
+	friend Message<T>& operator>>(Message& msg, DataType& data) {
 		static_assert(std::is_standard_layout<DataType>::value,
 					  "Data is too complex to be pushed into vector");
 
@@ -107,7 +104,7 @@ public:
 	}
 
 	// 打印消息
-	friend std::ostream& operator<<(std::ostream& os, const message<T>& msg) {
+	friend std::ostream& operator<<(std::ostream& os, const Message<T>& msg) {
 		// os << "ID:" << enum_to_string(msg.getId()) << " body size:" << msg.m_body.size()
 		//    << ", body:" << msg.m_body.data();
 
@@ -130,21 +127,21 @@ public:
 		return os;
 	}
 
-	owned_message(std::shared_ptr<connection<T>> remote, const message<T>& msg)
+	owned_message(std::shared_ptr<connection<T>> remote, const Message<T>& msg)
 		: peer(remote), msg(msg) {}
 
 public:
 	std::shared_ptr<connection<T>> peer; // only server: 哪个client发送的消息
-	message<T> msg;
+	Message<T> msg;
 };
 
 template <class T>
 using RcvMsgPtr = std::shared_ptr<owned_message<T>>;
 
 template <class T>
-using SndMsgPtr = std::shared_ptr<message<T>>;
+using SndMsgPtr = std::shared_ptr<Message<T>>;
 
 template <class T>
 SndMsgPtr<T> makeSndMsg(T id) {
-	return std::make_shared<message<T>>(id);
+	return std::make_shared<Message<T>>(id);
 }

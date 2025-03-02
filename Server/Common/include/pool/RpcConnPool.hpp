@@ -52,22 +52,25 @@ public:
 
 		std::lock_guard<std::mutex> lock(m_mtx);
 
-		std::shared_ptr<Channel> channel = grpc::CreateChannel(host + ":" + std::to_string(port),
-															   grpc::InsecureChannelCredentials());
-		// 检查 是否可以连接
-		if (!channel->WaitForConnected(std::chrono::system_clock::now() +
-									   std::chrono::seconds{5})) {
-			throw std::runtime_error("Failed to connect to " + host + ":" + std::to_string(port));
-		}
+		// 创建 channel
+		m_channel = grpc::CreateChannel(host + ":" + std::to_string(port),
+										grpc::InsecureChannelCredentials());
 
 		for (int i = 0; i < pool_size; ++i) {
-			std::unique_ptr<typename RpcService::Stub> stub = RpcService::NewStub(channel);
+			std::unique_ptr<typename RpcService::Stub> stub = RpcService::NewStub(m_channel);
 
 			m_pool.emplace_back(std::move(stub));
 		}
 
 		m_pool_size = pool_size;
 		m_initialized = true;
+	}
+
+	// 检查 是否可以连接
+	bool testConnection(const std::chrono::seconds& timeout = std::chrono::seconds{3}) {
+		if (!initialized()) return false;
+
+		return m_channel->WaitForConnected(std::chrono::system_clock::now() + timeout);
 	}
 
 	bool initialized() const { return m_initialized; }
@@ -119,6 +122,8 @@ public:
 private:
 	std::deque<StubPtr> m_pool;
 	size_t m_pool_size = 0;
+
+	std::shared_ptr<Channel> m_channel;
 
 	std::mutex m_mtx;
 	std::condition_variable m_cv;

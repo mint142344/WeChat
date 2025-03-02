@@ -4,10 +4,10 @@
 #include "net_tsqueue.hpp"
 #include "net_message.hpp"
 
-#include <atomic>
-#include <boost/asio/post.hpp>
 #include <boost/asio/signal_set.hpp>
 #include <boost/asio/steady_timer.hpp>
+
+#include <atomic>
 #include <chrono>
 #include <memory>
 #include <thread>
@@ -20,7 +20,7 @@ class server_interface {
 
 public:
 	server_interface(uint16_t port)
-		: m_acceptor(m_ctx, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), port)),
+		: m_acceptor(m_ctx, tcp::endpoint(net::ip::tcp::v4(), port)),
 		  m_signals(m_ctx, SIGINT, SIGTERM) {}
 
 	virtual ~server_interface() { stop(); }
@@ -90,7 +90,7 @@ public:
 private:
 	// [ASYNC] 异步等待客户端连接
 	void waitForConnected() {
-		m_acceptor.async_accept([this](const std::error_code& ec, asio::ip::tcp::socket socket) {
+		m_acceptor.async_accept([this](const std::error_code& ec, net::ip::tcp::socket socket) {
 			if (ec) {
 				fmt::println(stderr, "waitClientConnection:{}, error: {}", __LINE__, ec.message());
 				return;
@@ -118,7 +118,7 @@ private:
 	// [ASYNC] 异步信号处理
 	void registerSignals() {
 		m_signals.async_wait([this](const std::error_code& ec, int signal) {
-			asio::post(m_ctx, [this]() {
+			net::post(m_ctx, [this]() {
 				// 断开所有连接
 				m_acceptor.close();
 				for (auto& pair : m_connections) {
@@ -146,7 +146,7 @@ protected:
 	virtual void onServerStart() = 0;
 
 protected:
-	asio::io_context m_ctx;
+	net::io_context m_ctx;
 	// 服务器 唯一消息队列
 	tsqueue<owned_message<T>> m_mq_recv;
 	// 所有连接
@@ -155,8 +155,8 @@ protected:
 private:
 	std::thread m_thread_ctx;
 
-	asio::ip::tcp::acceptor m_acceptor;
+	net::ip::tcp::acceptor m_acceptor;
 
-	asio::signal_set m_signals;
+	net::signal_set m_signals;
 	std::atomic<bool> m_is_running{false};
 };

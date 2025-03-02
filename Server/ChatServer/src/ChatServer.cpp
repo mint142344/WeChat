@@ -1,14 +1,21 @@
 #include "ChatServer.h"
 #include "ConfigManager.h"
 
+#include "RpcService.h"
+#include "net_message.hpp"
+
 #include <fmt/base.h>
+#include <nlohmann/json.hpp>
+
 #include <chrono>
 
+using json = nlohmann::json;
+
 ChatServer::ChatServer(uint16_t port)
-	: server_interface<ChatMsgType>(port),
+	: server_interface<MsgID>(port),
 	  m_beat_timer(m_ctx),
 	  m_beat_timeout(ConfigManager::getInstance()->beatTimeout()),
-	  m_check_beat_time(ConfigManager::getInstance()->checkBeatTime()),
+	  m_beat_duration(ConfigManager::getInstance()->checkBeatDuration()),
 	  m_max_connections(ConfigManager::getInstance()->maxConnections()) {}
 
 // 客户端连接时 调用
@@ -18,9 +25,6 @@ bool ChatServer::onClientConnect(ConnPtr conn) {
 		return false;
 	}
 
-	SndMsgPtr<ChatMsgType> pMsg =
-		std::make_shared<message<ChatMsgType>>(ChatMsgType::SERVER_ACCEPTED);
-	sendOneClient(conn, pMsg);
 	fmt::println("[{}] accepted", conn->getId());
 
 	return true;
@@ -32,46 +36,40 @@ void ChatServer::onClientDisconnect(ConnPtr conn) {
 }
 
 // 消息到达时 调用
-void ChatServer::onMessage(RcvMsgPtr<ChatMsgType> pMsg) {
+void ChatServer::onMessage(RcvMsgPtr<MsgID> pMsg) {
 	ConnPtr conn = pMsg->peer;
-	message<ChatMsgType>& msg = pMsg->msg;
+	Message<MsgID>& msg = pMsg->msg;
 
-	// fmt::println("{}", msg.data());
+	fmt::println("onMessage:{}", enum_to_string(msg.getId()));
 
 	// 服务器处理指定客户端的消息
 	switch (msg.getId()) {
-		case ChatMsgType::PING: {
-			SndMsgPtr<ChatMsgType> pMsg = std::make_shared<message<ChatMsgType>>(ChatMsgType::PING);
-			pMsg->writeBody(msg.data(), msg.size());
-			sendOneClient(conn, pMsg);
-		} break;
-		case ChatMsgType::SERVER_ECHO: {
-			SndMsgPtr<ChatMsgType> pMsg =
-				std::make_shared<message<ChatMsgType>>(ChatMsgType::SERVER_ECHO);
-			pMsg->writeBody(msg.data(), msg.size());
-			sendOneClient(conn, pMsg);
-		} break;
-		case ChatMsgType::MESSAGE_ALL: {
-			SndMsgPtr<ChatMsgType> pMsg =
-				std::make_shared<message<ChatMsgType>>(ChatMsgType::MESSAGE_ALL);
-			pMsg->writeBody(msg.data(), msg.size());
-			sendAllClient(pMsg, conn);
+		case MsgID::HEARTBEAT:
+			conn->updateActiveTime();
 
-		} break;
-		case ChatMsgType::HEARTBEAT:
-		case ChatMsgType::SERVER_ACCEPTED:
 			break;
+
+			// only server
+		case MsgID::LOGIN_CHAT_SERVER:
+			verifyLogin(conn, pMsg);
+			break;
+
+			// only client
+		case MsgID::LOGIN_CHAT_SERVER_ACK:
 			break;
 	}
 }
 
 // 服务器启动时 调用
-void ChatServer::onServerStart() { checkHeartBeat(); }
+void ChatServer::onServerStart() {
+	// 启动心跳检测
+	checkHeartBeat();
+}
 
 // 超时心跳检测
 void ChatServer::checkHeartBeat() {
 	// 10s 检测一次
-	m_beat_timer.expires_after(std::chrono::seconds{m_check_beat_time});
+	m_beat_timer.expires_after(std::chrono::seconds{m_beat_duration});
 
 	m_beat_timer.async_wait([this](const std::error_code& ec) {
 		if (ec) {
@@ -106,4 +104,28 @@ void ChatServer::checkHeartBeat() {
 		// 继续检测
 		if (isRunning()) checkHeartBeat();
 	});
+}
+
+void ChatServer::verifyLogin(ConnPtr conn, RcvMsgPtr<MsgID> pMsg) {
+	char* data = pMsg->msg.data();
+	size_t size = pMsg->msg.size();
+
+	json j = json::parse(data, data + size);
+
+	json ret = RPC::verifyToken(j["id"], j["token"]);
+
+	SndMsgPtr<MsgID> msg = std::make_shared<Message<MsgID>>();
+	msg->setId(MsgID::LOGIN_CHAT_SERVER_ACK);
+	std::string res = ret.dump();
+	msg->writeBody(res.data(), res.size());
+
+	if (ret["status"] == "ok") {
+		// 登录成功 发送登录成功消息
+		conn->send(msg);
+
+	} else {
+		// 登录失败 发送登录失败消息
+		conn->send(msg);
+		conn->disconnect();
+	}
 }

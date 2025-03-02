@@ -2,6 +2,7 @@
 
 #include "Singleton.hpp"
 
+#include <cstdint>
 #include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
@@ -38,7 +39,11 @@ public:
 	// 心跳检测超时时间(beat_timeout)
 	size_t beatTimeout() const;
 	// 心跳检测周期(check_beat_time)
-	size_t checkBeatTime() const;
+	size_t checkBeatDuration() const;
+
+	std::string statusHost() const;
+	uint16_t statusPort() const;
+	uint16_t statusConnPoolSize() const;
 
 private:
 	static bool checkChatServerConfig(const json& data, std::string& error);

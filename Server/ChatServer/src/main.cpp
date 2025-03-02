@@ -1,11 +1,17 @@
 #include "ChatServer.h"
 #include "ConfigManager.h"
+#include "RpcService.h"
 
 int main(int argc, char* argv[]) {
 	ConfigManager::getInstance()->load();
-	uint16_t port = ConfigManager::getInstance()->port();
+	auto* config = ConfigManager::getInstance();
 
-	ChatServer server(port);
+	// 1. Init RPC Service
+	RpcServiceConnPool<StatusService>::getInstance()->init(
+		config->statusHost(), config->statusPort(), config->statusConnPoolSize());
+
+	// 2. Start ChatServer
+	ChatServer server(config->port());
 	if (!server.start()) return 1;
 
 	try {
