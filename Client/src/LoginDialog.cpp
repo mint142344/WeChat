@@ -65,10 +65,11 @@ LoginDialog::LoginDialog(QWidget* parent)
 					tcp->setProperty("id", json["id"].toInt());
 					tcp->setProperty("token", json["token"].toString());
 
-					// 登录 ChatServer
-					tcp->loginToHost(json["host"].toString(), json["port"].toInt());
 					// 阻塞等待登录结果
-					m_loading_dialog->exec();
+					m_loading_dialog->show();
+
+					// 登录 ChatServer
+					tcp->loginToHost(json["host"].toString(), json["port"].toString().toInt());
 				} else {
 					// 登录失败
 					setErrorHint(true, json["message"].toString());

@@ -1,25 +1,26 @@
 #include "TcpClient.h"
+
 #include <QJsonObject>
 #include <QJsonDocument>
 
 void TcpClient::sendMsg(MsgID id, const QByteArray& body) {
-	message_header<MsgID> header;
-	header.id = id;
-	header.size = body.size();
+	m_send_queue.enqueue({id, body});
 
-	m_socket->write((char*)(&header), sizeof(header));
-	m_socket->write(body);
-
-	// 已发送消息
-	emit sentMsg(id);
+	processSendQueue();
 }
 
 void TcpClient::loginToHost(const QString& host, uint16_t port) {
 	m_socket->connectToHost(host, port);
 }
 
-TcpClient::TcpClient(QObject* parent) : m_socket{new QTcpSocket{parent}} {
+TcpClient::TcpClient(QObject* parent)
+	: m_socket{new QTcpSocket{parent}}, m_hearbeat_timer(new QTimer{parent}) {
 	registerCallback();
+
+	// 心跳包 10s 发送一次
+	m_hearbeat_timer->setInterval(10000);
+	connect(m_hearbeat_timer, &QTimer::timeout, this, &TcpClient::sendHeartbeat);
+	m_hearbeat_timer->start();
 
 	connect(m_socket, &QTcpSocket::connected, this, &TcpClient::onConnected);
 	connect(m_socket, &QTcpSocket::disconnected, this, &TcpClient::onDisconnected);
@@ -45,13 +46,13 @@ void TcpClient::onReadyRead() {
 	m_buffer.append(m_socket->readAll());
 
 	// 1.read header
-	if (m_buffer.size() < sizeof(message_header<MsgID>)) {
+	if (m_buffer.size() < sizeof(MessageHeader<MsgID>)) {
 		return;
 	}
 
 	if (m_state == ReadState::HEADER) {
-		memcpy(&m_header, m_buffer.data(), sizeof(message_header<MsgID>));
-		m_buffer.remove(0, sizeof(message_header<MsgID>));
+		memcpy(&m_header, m_buffer.data(), sizeof(MessageHeader<MsgID>));
+		m_buffer.remove(0, sizeof(MessageHeader<MsgID>));
 
 		m_state = ReadState::BODY;
 	}
@@ -89,11 +90,11 @@ void TcpClient::onError(QAbstractSocket::SocketError socketError) {
 	qDebug() << "TcpClient::onError: " << socketError << m_socket->errorString();
 }
 
+void TcpClient::sendHeartbeat() { sendMsg(MsgID::HEARTBEAT, ""); }
+
 void TcpClient::registerCallback() {
 	// 登录 ChatServer
 	m_callbacks[MsgID::LOGIN_CHAT_SERVER_ACK] = [this](const QByteArray& body) {
-		qDebug() << "LOGIN_CHAT_SERVER_ACK: " << body.size();
-
 		QJsonObject json = QJsonDocument::fromJson(body).object();
 
 		if (json["status"].toString() == "ok") {
@@ -115,8 +116,24 @@ void TcpClient::loginChatServer() {
 	if (m_auth) return;
 
 	QJsonObject json;
-	json["id"] = m_socket->property("id").toInt();
-	json["token"] = m_socket->property("token").toString();
+	json["id"] = this->property("id").toInt();
+	json["token"] = this->property("token").toString();
 
 	sendMsg(MsgID::LOGIN_CHAT_SERVER, QJsonDocument(json).toJson(QJsonDocument::Compact));
+}
+
+void TcpClient::processSendQueue() {
+	if (m_send_queue.isEmpty()) return;
+
+	auto [id, body] = m_send_queue.dequeue();
+
+	MessageHeader<MsgID> header;
+	header.id = id;
+	header.size = body.size();
+
+	auto bytes_header = m_socket->write((char*)(&header), sizeof(header));
+	auto bytes_body = m_socket->write(body);
+
+	// 已发送消息
+	emit sentMsg(id, bytes_header + bytes_body);
 }
