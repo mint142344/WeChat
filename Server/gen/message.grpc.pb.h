@@ -27,10 +27,13 @@
 
 namespace message {
 
-// > Server directory
-// protoc --cpp_out=gen -I=. message.proto
-// protoc --grpc_out=gen --plugin=protoc-gen-grpc=`which grpc_cpp_plugin` -I. message.proto
+// > In Server directory execute the following commands to generate the C++ code
+// $ protoc --cpp_out=gen -I=. message.proto
+// $ protoc --grpc_out=gen --plugin=protoc-gen-grpc=`which grpc_cpp_plugin` -I. message.proto
 //
+// ////////////////////////////////////////////////////////////////////////////////
+// / 邮箱服务
+// ////////////////////////////////////////////////////////////////////////////////
 class EmailVerifyService final {
  public:
   static constexpr char const* service_full_name() {
@@ -254,7 +257,7 @@ class StatusService final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::message::ChatServerResponse>> PrepareAsyncgetChatServerInfo(::grpc::ClientContext* context, const ::message::ChatServerRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::message::ChatServerResponse>>(PrepareAsyncgetChatServerInfoRaw(context, request, cq));
     }
-    // ChatServer 验证 客户端的 登录token
+    // ChatServer 从 StatuServer 验证token
     virtual ::grpc::Status verifyToken(::grpc::ClientContext* context, const ::message::LoginRequest& request, ::message::LoginResponse* response) = 0;
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::message::LoginResponse>> AsyncverifyToken(::grpc::ClientContext* context, const ::message::LoginRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::message::LoginResponse>>(AsyncverifyTokenRaw(context, request, cq));
@@ -262,15 +265,26 @@ class StatusService final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::message::LoginResponse>> PrepareAsyncverifyToken(::grpc::ClientContext* context, const ::message::LoginRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::message::LoginResponse>>(PrepareAsyncverifyTokenRaw(context, request, cq));
     }
+    // ChatServer 通知 StatusServer 用户登出
+    virtual ::grpc::Status userLogout(::grpc::ClientContext* context, const ::message::LogoutRequest& request, ::message::LogoutResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::message::LogoutResponse>> AsyncuserLogout(::grpc::ClientContext* context, const ::message::LogoutRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::message::LogoutResponse>>(AsyncuserLogoutRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::message::LogoutResponse>> PrepareAsyncuserLogout(::grpc::ClientContext* context, const ::message::LogoutRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::message::LogoutResponse>>(PrepareAsyncuserLogoutRaw(context, request, cq));
+    }
     class async_interface {
      public:
       virtual ~async_interface() {}
       // 客户端 获取 ChatServer 的信息
       virtual void getChatServerInfo(::grpc::ClientContext* context, const ::message::ChatServerRequest* request, ::message::ChatServerResponse* response, std::function<void(::grpc::Status)>) = 0;
       virtual void getChatServerInfo(::grpc::ClientContext* context, const ::message::ChatServerRequest* request, ::message::ChatServerResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      // ChatServer 验证 客户端的 登录token
+      // ChatServer 从 StatuServer 验证token
       virtual void verifyToken(::grpc::ClientContext* context, const ::message::LoginRequest* request, ::message::LoginResponse* response, std::function<void(::grpc::Status)>) = 0;
       virtual void verifyToken(::grpc::ClientContext* context, const ::message::LoginRequest* request, ::message::LoginResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      // ChatServer 通知 StatusServer 用户登出
+      virtual void userLogout(::grpc::ClientContext* context, const ::message::LogoutRequest* request, ::message::LogoutResponse* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void userLogout(::grpc::ClientContext* context, const ::message::LogoutRequest* request, ::message::LogoutResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
     };
     typedef class async_interface experimental_async_interface;
     virtual class async_interface* async() { return nullptr; }
@@ -280,6 +294,8 @@ class StatusService final {
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::message::ChatServerResponse>* PrepareAsyncgetChatServerInfoRaw(::grpc::ClientContext* context, const ::message::ChatServerRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::message::LoginResponse>* AsyncverifyTokenRaw(::grpc::ClientContext* context, const ::message::LoginRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::message::LoginResponse>* PrepareAsyncverifyTokenRaw(::grpc::ClientContext* context, const ::message::LoginRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::message::LogoutResponse>* AsyncuserLogoutRaw(::grpc::ClientContext* context, const ::message::LogoutRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::message::LogoutResponse>* PrepareAsyncuserLogoutRaw(::grpc::ClientContext* context, const ::message::LogoutRequest& request, ::grpc::CompletionQueue* cq) = 0;
   };
   class Stub final : public StubInterface {
    public:
@@ -298,6 +314,13 @@ class StatusService final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::message::LoginResponse>> PrepareAsyncverifyToken(::grpc::ClientContext* context, const ::message::LoginRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::message::LoginResponse>>(PrepareAsyncverifyTokenRaw(context, request, cq));
     }
+    ::grpc::Status userLogout(::grpc::ClientContext* context, const ::message::LogoutRequest& request, ::message::LogoutResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::message::LogoutResponse>> AsyncuserLogout(::grpc::ClientContext* context, const ::message::LogoutRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::message::LogoutResponse>>(AsyncuserLogoutRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::message::LogoutResponse>> PrepareAsyncuserLogout(::grpc::ClientContext* context, const ::message::LogoutRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::message::LogoutResponse>>(PrepareAsyncuserLogoutRaw(context, request, cq));
+    }
     class async final :
       public StubInterface::async_interface {
      public:
@@ -305,6 +328,8 @@ class StatusService final {
       void getChatServerInfo(::grpc::ClientContext* context, const ::message::ChatServerRequest* request, ::message::ChatServerResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
       void verifyToken(::grpc::ClientContext* context, const ::message::LoginRequest* request, ::message::LoginResponse* response, std::function<void(::grpc::Status)>) override;
       void verifyToken(::grpc::ClientContext* context, const ::message::LoginRequest* request, ::message::LoginResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      void userLogout(::grpc::ClientContext* context, const ::message::LogoutRequest* request, ::message::LogoutResponse* response, std::function<void(::grpc::Status)>) override;
+      void userLogout(::grpc::ClientContext* context, const ::message::LogoutRequest* request, ::message::LogoutResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
      private:
       friend class Stub;
       explicit async(Stub* stub): stub_(stub) { }
@@ -320,8 +345,11 @@ class StatusService final {
     ::grpc::ClientAsyncResponseReader< ::message::ChatServerResponse>* PrepareAsyncgetChatServerInfoRaw(::grpc::ClientContext* context, const ::message::ChatServerRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::message::LoginResponse>* AsyncverifyTokenRaw(::grpc::ClientContext* context, const ::message::LoginRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::message::LoginResponse>* PrepareAsyncverifyTokenRaw(::grpc::ClientContext* context, const ::message::LoginRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::message::LogoutResponse>* AsyncuserLogoutRaw(::grpc::ClientContext* context, const ::message::LogoutRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::message::LogoutResponse>* PrepareAsyncuserLogoutRaw(::grpc::ClientContext* context, const ::message::LogoutRequest& request, ::grpc::CompletionQueue* cq) override;
     const ::grpc::internal::RpcMethod rpcmethod_getChatServerInfo_;
     const ::grpc::internal::RpcMethod rpcmethod_verifyToken_;
+    const ::grpc::internal::RpcMethod rpcmethod_userLogout_;
   };
   static std::unique_ptr<Stub> NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
 
@@ -331,8 +359,10 @@ class StatusService final {
     virtual ~Service();
     // 客户端 获取 ChatServer 的信息
     virtual ::grpc::Status getChatServerInfo(::grpc::ServerContext* context, const ::message::ChatServerRequest* request, ::message::ChatServerResponse* response);
-    // ChatServer 验证 客户端的 登录token
+    // ChatServer 从 StatuServer 验证token
     virtual ::grpc::Status verifyToken(::grpc::ServerContext* context, const ::message::LoginRequest* request, ::message::LoginResponse* response);
+    // ChatServer 通知 StatusServer 用户登出
+    virtual ::grpc::Status userLogout(::grpc::ServerContext* context, const ::message::LogoutRequest* request, ::message::LogoutResponse* response);
   };
   template <class BaseClass>
   class WithAsyncMethod_getChatServerInfo : public BaseClass {
@@ -374,7 +404,27 @@ class StatusService final {
       ::grpc::Service::RequestAsyncUnary(1, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
-  typedef WithAsyncMethod_getChatServerInfo<WithAsyncMethod_verifyToken<Service > > AsyncService;
+  template <class BaseClass>
+  class WithAsyncMethod_userLogout : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_userLogout() {
+      ::grpc::Service::MarkMethodAsync(2);
+    }
+    ~WithAsyncMethod_userLogout() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status userLogout(::grpc::ServerContext* /*context*/, const ::message::LogoutRequest* /*request*/, ::message::LogoutResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestuserLogout(::grpc::ServerContext* context, ::message::LogoutRequest* request, ::grpc::ServerAsyncResponseWriter< ::message::LogoutResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(2, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  typedef WithAsyncMethod_getChatServerInfo<WithAsyncMethod_verifyToken<WithAsyncMethod_userLogout<Service > > > AsyncService;
   template <class BaseClass>
   class WithCallbackMethod_getChatServerInfo : public BaseClass {
    private:
@@ -429,7 +479,34 @@ class StatusService final {
     virtual ::grpc::ServerUnaryReactor* verifyToken(
       ::grpc::CallbackServerContext* /*context*/, const ::message::LoginRequest* /*request*/, ::message::LoginResponse* /*response*/)  { return nullptr; }
   };
-  typedef WithCallbackMethod_getChatServerInfo<WithCallbackMethod_verifyToken<Service > > CallbackService;
+  template <class BaseClass>
+  class WithCallbackMethod_userLogout : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithCallbackMethod_userLogout() {
+      ::grpc::Service::MarkMethodCallback(2,
+          new ::grpc::internal::CallbackUnaryHandler< ::message::LogoutRequest, ::message::LogoutResponse>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::message::LogoutRequest* request, ::message::LogoutResponse* response) { return this->userLogout(context, request, response); }));}
+    void SetMessageAllocatorFor_userLogout(
+        ::grpc::MessageAllocator< ::message::LogoutRequest, ::message::LogoutResponse>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(2);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::message::LogoutRequest, ::message::LogoutResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~WithCallbackMethod_userLogout() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status userLogout(::grpc::ServerContext* /*context*/, const ::message::LogoutRequest* /*request*/, ::message::LogoutResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    virtual ::grpc::ServerUnaryReactor* userLogout(
+      ::grpc::CallbackServerContext* /*context*/, const ::message::LogoutRequest* /*request*/, ::message::LogoutResponse* /*response*/)  { return nullptr; }
+  };
+  typedef WithCallbackMethod_getChatServerInfo<WithCallbackMethod_verifyToken<WithCallbackMethod_userLogout<Service > > > CallbackService;
   typedef CallbackService ExperimentalCallbackService;
   template <class BaseClass>
   class WithGenericMethod_getChatServerInfo : public BaseClass {
@@ -461,6 +538,23 @@ class StatusService final {
     }
     // disable synchronous version of this method
     ::grpc::Status verifyToken(::grpc::ServerContext* /*context*/, const ::message::LoginRequest* /*request*/, ::message::LoginResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithGenericMethod_userLogout : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_userLogout() {
+      ::grpc::Service::MarkMethodGeneric(2);
+    }
+    ~WithGenericMethod_userLogout() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status userLogout(::grpc::ServerContext* /*context*/, const ::message::LogoutRequest* /*request*/, ::message::LogoutResponse* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -506,6 +600,26 @@ class StatusService final {
     }
   };
   template <class BaseClass>
+  class WithRawMethod_userLogout : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_userLogout() {
+      ::grpc::Service::MarkMethodRaw(2);
+    }
+    ~WithRawMethod_userLogout() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status userLogout(::grpc::ServerContext* /*context*/, const ::message::LogoutRequest* /*request*/, ::message::LogoutResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestuserLogout(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(2, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
   class WithRawCallbackMethod_getChatServerInfo : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
@@ -547,6 +661,28 @@ class StatusService final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     virtual ::grpc::ServerUnaryReactor* verifyToken(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
+  };
+  template <class BaseClass>
+  class WithRawCallbackMethod_userLogout : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawCallbackMethod_userLogout() {
+      ::grpc::Service::MarkMethodRawCallback(2,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->userLogout(context, request, response); }));
+    }
+    ~WithRawCallbackMethod_userLogout() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status userLogout(::grpc::ServerContext* /*context*/, const ::message::LogoutRequest* /*request*/, ::message::LogoutResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    virtual ::grpc::ServerUnaryReactor* userLogout(
       ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
@@ -603,9 +739,36 @@ class StatusService final {
     // replace default version of method with streamed unary
     virtual ::grpc::Status StreamedverifyToken(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::message::LoginRequest,::message::LoginResponse>* server_unary_streamer) = 0;
   };
-  typedef WithStreamedUnaryMethod_getChatServerInfo<WithStreamedUnaryMethod_verifyToken<Service > > StreamedUnaryService;
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_userLogout : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_userLogout() {
+      ::grpc::Service::MarkMethodStreamed(2,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::message::LogoutRequest, ::message::LogoutResponse>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::message::LogoutRequest, ::message::LogoutResponse>* streamer) {
+                       return this->StreameduserLogout(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_userLogout() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status userLogout(::grpc::ServerContext* /*context*/, const ::message::LogoutRequest* /*request*/, ::message::LogoutResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreameduserLogout(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::message::LogoutRequest,::message::LogoutResponse>* server_unary_streamer) = 0;
+  };
+  typedef WithStreamedUnaryMethod_getChatServerInfo<WithStreamedUnaryMethod_verifyToken<WithStreamedUnaryMethod_userLogout<Service > > > StreamedUnaryService;
   typedef Service SplitStreamedService;
-  typedef WithStreamedUnaryMethod_getChatServerInfo<WithStreamedUnaryMethod_verifyToken<Service > > StreamedService;
+  typedef WithStreamedUnaryMethod_getChatServerInfo<WithStreamedUnaryMethod_verifyToken<WithStreamedUnaryMethod_userLogout<Service > > > StreamedService;
 };
 
 }  // namespace message

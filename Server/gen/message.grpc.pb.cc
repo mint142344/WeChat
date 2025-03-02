@@ -85,6 +85,7 @@ EmailVerifyService::Service::~Service() {
 static const char* StatusService_method_names[] = {
   "/message.StatusService/getChatServerInfo",
   "/message.StatusService/verifyToken",
+  "/message.StatusService/userLogout",
 };
 
 std::unique_ptr< StatusService::Stub> StatusService::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
@@ -96,6 +97,7 @@ std::unique_ptr< StatusService::Stub> StatusService::NewStub(const std::shared_p
 StatusService::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options)
   : channel_(channel), rpcmethod_getChatServerInfo_(StatusService_method_names[0], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_verifyToken_(StatusService_method_names[1], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_userLogout_(StatusService_method_names[2], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status StatusService::Stub::getChatServerInfo(::grpc::ClientContext* context, const ::message::ChatServerRequest& request, ::message::ChatServerResponse* response) {
@@ -144,6 +146,29 @@ void StatusService::Stub::async::verifyToken(::grpc::ClientContext* context, con
   return result;
 }
 
+::grpc::Status StatusService::Stub::userLogout(::grpc::ClientContext* context, const ::message::LogoutRequest& request, ::message::LogoutResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::message::LogoutRequest, ::message::LogoutResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_userLogout_, context, request, response);
+}
+
+void StatusService::Stub::async::userLogout(::grpc::ClientContext* context, const ::message::LogoutRequest* request, ::message::LogoutResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::message::LogoutRequest, ::message::LogoutResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_userLogout_, context, request, response, std::move(f));
+}
+
+void StatusService::Stub::async::userLogout(::grpc::ClientContext* context, const ::message::LogoutRequest* request, ::message::LogoutResponse* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_userLogout_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::message::LogoutResponse>* StatusService::Stub::PrepareAsyncuserLogoutRaw(::grpc::ClientContext* context, const ::message::LogoutRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::message::LogoutResponse, ::message::LogoutRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_userLogout_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::message::LogoutResponse>* StatusService::Stub::AsyncuserLogoutRaw(::grpc::ClientContext* context, const ::message::LogoutRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncuserLogoutRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
 StatusService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       StatusService_method_names[0],
@@ -165,6 +190,16 @@ StatusService::Service::Service() {
              ::message::LoginResponse* resp) {
                return service->verifyToken(ctx, req, resp);
              }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      StatusService_method_names[2],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< StatusService::Service, ::message::LogoutRequest, ::message::LogoutResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](StatusService::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::message::LogoutRequest* req,
+             ::message::LogoutResponse* resp) {
+               return service->userLogout(ctx, req, resp);
+             }, this)));
 }
 
 StatusService::Service::~Service() {
@@ -178,6 +213,13 @@ StatusService::Service::~Service() {
 }
 
 ::grpc::Status StatusService::Service::verifyToken(::grpc::ServerContext* context, const ::message::LoginRequest* request, ::message::LoginResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status StatusService::Service::userLogout(::grpc::ServerContext* context, const ::message::LogoutRequest* request, ::message::LogoutResponse* response) {
   (void) context;
   (void) request;
   (void) response;

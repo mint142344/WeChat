@@ -12,6 +12,7 @@
 #include <unordered_map>
 #include <list>
 
+#include "RpcService.h"
 #include "message.pb.h"
 #include "message.grpc.pb.h"
 #include "net.h"
@@ -83,13 +84,17 @@ public:
 	StatusServiceImpl& operator=(const StatusServiceImpl&) = delete;
 	StatusServiceImpl& operator=(StatusServiceImpl&&) = delete;
 
-	// 获取 ChatServer 信息
+	// [RPC] 获取 ChatServer 信息
 	Status getChatServerInfo(ServerContext* context, const ChatServerRequest* req,
 							 ChatServerResponse* res) override;
 
-	// ChatServer 验证客户端的 登录token
+	// [RPC] ChatServer 验证客户端的 登录token
 	Status verifyToken(ServerContext* context, const LoginRequest* req,
 					   LoginResponse* res) override;
+
+	// [RPC] ChatServer 通知 StatuServer 用户登出
+	Status userLogout(ServerContext* context, const LogoutRequest* req,
+					  LogoutResponse* res) override;
 
 private:
 	// 验证超时时间

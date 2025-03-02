@@ -139,6 +139,36 @@ Status StatusServiceImpl::verifyToken(ServerContext* context, const LoginRequest
 	return Status::OK;
 }
 
+Status StatusServiceImpl::userLogout(ServerContext* context, const LogoutRequest* req,
+									 LogoutResponse* res) {
+	std::unique_lock<std::mutex> lock(m_mtx);
+
+	// 查找 用户
+	auto it = m_users.find(req->id());
+	if (it == m_users.end()) {
+		res->set_message("No user");
+		return {grpc::StatusCode::NOT_FOUND, "No user"};
+	}
+
+	// token 错误
+	if (it->second.token != req->token() || !it->second.is_verify) {
+		res->set_message("Invalid token");
+		return {grpc::StatusCode::UNAUTHENTICATED, "Invalid token"};
+	}
+
+	// 更新 ChatServer 连接数 & 删除用户
+	if (it->second.is_verify) {
+		--it->second.server_info->conn_cnt;
+		m_users.erase(it);
+	}
+
+	res->set_message("ok");
+
+	fmt::println("User {} logout", req->id());
+
+	return Status::OK;
+}
+
 std::string StatusServiceImpl::generateToken() {
 	using namespace boost;
 	uuids::uuid uuid = uuids::random_generator{}();
@@ -147,6 +177,13 @@ std::string StatusServiceImpl::generateToken() {
 }
 
 void StatusServiceImpl::cleanJunkUsers() {
+	// 打印当前 所有用户ID
+	fmt::print("Current users: ");
+	for (const auto& [id, user] : m_users) {
+		fmt::print("{} ", id);
+	}
+	fmt::print("\n");
+
 	size_t cnt = 0;
 	auto cur = std::chrono::steady_clock::now();
 

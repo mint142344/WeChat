@@ -18,6 +18,8 @@ using message::ChatServerResponse;
 using message::StatusService;
 using message::LoginRequest;
 using message::LoginResponse;
+using message::LogoutRequest;
+using message::LogoutResponse;
 
 // RPC 服务 客户端
 namespace RPC {
@@ -30,5 +32,8 @@ json getChatServerInfo(uint32_t id);
 
 // ChatServer 验证 Token
 json verifyToken(uint32_t id, const std::string& token);
+
+// ChatServer 通知 StatuServer 用户登出
+json userLogout(uint32_t id, const std::string& token);
 
 } // namespace RPC

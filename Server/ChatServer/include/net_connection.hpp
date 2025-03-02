@@ -10,7 +10,13 @@
 
 #include <chrono>
 #include <memory>
+#include <optional>
 #include <system_error>
+#include <map>
+#include <any>
+
+template <class T>
+class server_interface;
 
 /*
  *	connection 类: 负责传输消息
@@ -23,46 +29,45 @@
 template <class T>
 class connection : public std::enable_shared_from_this<connection<T>> {
 public:
-	enum class owner { server, client };
+	connection(const connection&) = delete;
+	connection(connection&&) = default;
+	connection& operator=(const connection&) = delete;
+	connection& operator=(connection&&) = default;
 
-public:
 	// who: server/client
-	connection(owner who, net::io_context& ctx, tcp::socket socket,
+	connection(net::io_context& ctx, server_interface<T>& server, tcp::socket socket,
 			   tsqueue<owned_message<T>>& queue)
-		: m_owner(who), m_ctx(ctx), m_socket(std::move(socket)), m_mq_recv(queue) {
-		if (m_owner == owner::server) {
-			// 生成 map 键值
-			m_uuid = boost::uuids::to_string(boost::uuids::random_generator()());
-			updateActiveTime();
-		}
+		: m_ctx(ctx), m_server(server), m_socket(std::move(socket)), m_mq_recv(queue) {
+		// 生成 TCP 连接标识
+		m_uuid = boost::uuids::to_string(boost::uuids::random_generator()());
+		updateActiveTime();
 	}
 
-	virtual ~connection() { m_socket.close(); }
+	virtual ~connection() { disconnect(); }
 
 public:
-	// Note:Only Client
-	void connectServer(const tcp::resolver::results_type& endpoints) {
-		if (m_owner == owner::client) {
-			net::async_connect(m_socket, endpoints,
-							   [this](const std::error_code& ec, const tcp::endpoint& endpoint) {
-								   if (ec) {
-									   fmt::println(stderr, "[Connection] connect error: {}",
-													ec.message());
-									   m_socket.close();
-									   return;
-								   }
+	// 设置元数据 [Only 业务层] [Not Thread Safe]
+	template <class ValueType>
+	void setMetaData(const std::string& key, ValueType value) {
+		m_meta[key] = value;
+	}
 
-								   fmt::println("[Connection] connected to server: {}:{}",
-												endpoint.address().to_string(), endpoint.port());
-
-								   readHeader();
-							   });
+	// 获取元数据 [Only 业务层] [Not Thread Safe]
+	template <class ValueType>
+	std::optional<ValueType> getMetaData(const std::string& key) {
+		if (auto it = m_meta.find(key); it != m_meta.end()) {
+			return std::any_cast<ValueType>(it->second);
 		}
-	};
 
-	// Note:Only Server
-	void serveClient() {
-		if (m_owner == owner::server && m_socket.is_open()) {
+		return std::nullopt;
+	}
+
+	// 移除元数据 [Only 业务层] [Not Thread Safe]
+	void removeMetaData(const std::string& key) { m_meta.erase(key); }
+
+	// 异步处理消息
+	void ayncHandling() {
+		if (m_socket.is_open()) {
 			// 监听 读事件
 			readHeader();
 		}
@@ -70,7 +75,11 @@ public:
 
 	// io_context线程中关闭socket
 	void disconnect() {
-		if (isConnected()) net::post(m_socket.get_executor(), [this]() { m_socket.close(); });
+		if (isConnected())
+			net::post(m_socket.get_executor(), [this]() {
+				m_socket.close();
+				m_server.onClientDisconnect(this->shared_from_this());
+			});
 	}
 
 	bool isConnected() const { return m_socket.is_open(); }
@@ -84,13 +93,13 @@ public:
 		});
 	}
 
-	// only server
+	// 获取连接标识
 	std::string getId() const { return m_uuid; }
 
-	// only server
+	// 获取最后活跃时间
 	std::chrono::steady_clock::time_point getLastActiveTime() const { return m_last_time; }
 
-	// only server
+	// 更新最后活跃时间
 	void updateActiveTime() { m_last_time = std::chrono::steady_clock::now(); }
 
 private:
@@ -109,7 +118,7 @@ private:
 												 ec.message());
 								}
 
-								m_socket.close();
+								disconnect();
 								return;
 							}
 
@@ -140,7 +149,7 @@ private:
 								fmt::println(stderr, "readBody:{}, error: {}", __LINE__,
 											 ec.message());
 
-								m_socket.close();
+								disconnect();
 								return;
 							}
 
@@ -165,11 +174,11 @@ private:
 								 fmt::println(stderr, "writeHeader:{}, error: {}", __LINE__,
 											  ec.message());
 
-								 m_socket.close();
+								 disconnect();
 								 return;
 							 }
 
-							 //   fmt::println("writeHeader:{}, write {} bytes", __LINE__, length);
+							 //  fmt::println("writeHeader:{}, write {} bytes", __LINE__, length);
 
 							 size_t body_size = m_mq_send.front()->size();
 							 // continue write body
@@ -194,7 +203,7 @@ private:
 								 fmt::println(stderr, "writeBody:{}, error: {}", __LINE__,
 											  ec.message());
 
-								 m_socket.close();
+								 disconnect();
 								 return;
 							 }
 
@@ -209,22 +218,19 @@ private:
 
 	// 添加消息到 接收队列
 	void addMessageToRcvQueue() {
-		if (m_owner == owner::server) {
-			auto msg = std::make_shared<owned_message<T>>(this->shared_from_this(), m_tmp_msg_in);
-			m_mq_recv.push_back(msg);
+		auto msg = std::make_shared<owned_message<T>>(this->shared_from_this(), m_tmp_msg_in);
+		m_mq_recv.push_back(msg);
 
-			// 更新最后活跃时间
-			updateActiveTime();
-
-		} else {
-			// client 只有一个connection
-			auto msg = std::make_shared<owned_message<T>>(nullptr, m_tmp_msg_in);
-			m_mq_recv.push_back(msg);
-		}
+		// 更新最后活跃时间
+		updateActiveTime();
 	}
 
 protected:
 	net::io_context& m_ctx;
+
+	// 当前连接的 owner server
+	server_interface<T>& m_server;
+
 	tcp::socket m_socket;
 
 	// 临时 保存接收消息
@@ -235,9 +241,11 @@ protected:
 	// 消息接收队列
 	tsqueue<owned_message<T>>& m_mq_recv;
 
-	owner m_owner = owner::server;
-	// only Server 唯一uuid
+	// 标识 TCP 连接
 	std::string m_uuid;
-	// only Server
+	// 最后活跃时间,用于心跳检测
 	std::chrono::steady_clock::time_point m_last_time;
+
+	// 元数据
+	std::map<std::string, std::any> m_meta;
 };

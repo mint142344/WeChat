@@ -2,10 +2,13 @@ syntax = "proto3";
 
 package message;
 
-// > Server directory
-// protoc --cpp_out=gen -I=. message.proto
-// protoc --grpc_out=gen --plugin=protoc-gen-grpc=`which grpc_cpp_plugin` -I. message.proto
+// > In Server directory execute the following commands to generate the C++ code
+// $ protoc --cpp_out=gen -I=. message.proto
+// $ protoc --grpc_out=gen --plugin=protoc-gen-grpc=`which grpc_cpp_plugin` -I. message.proto
 
+//////////////////////////////////////////////////////////////////////////////////
+/// 邮箱服务
+//////////////////////////////////////////////////////////////////////////////////
 service EmailVerifyService {
     rpc getEmailVerifyCode(EmailVerifyRequest) returns (EmailVerifyResponse);
 }
@@ -20,6 +23,8 @@ message EmailVerifyResponse{
 }
 
 
+//////////////////////////////////////////////////////////////////////////////////
+/// 状态服务
 //////////////////////////////////////////////////////////////////////////////////
 message ChatServerRequest {
     uint32 id = 1;      // 数据库中的用户 id
@@ -42,10 +47,22 @@ message LoginResponse {
     string message = 1;
 }
 
+message LogoutRequest {
+    uint32 id = 1;
+    string token = 2;   // 同 LoginRequest
+}
+
+message LogoutResponse {
+    string message = 1;
+}
+
 service StatusService {
     // 客户端 获取 ChatServer 的信息
     rpc getChatServerInfo (ChatServerRequest) returns (ChatServerResponse);
 
-    // ChatServer 验证 客户端的 登录token
+    // ChatServer 从 StatuServer 验证token
     rpc verifyToken (LoginRequest) returns (LoginResponse);
+
+    // ChatServer 通知 StatusServer 用户登出
+    rpc userLogout (LogoutRequest) returns (LogoutResponse);
 }

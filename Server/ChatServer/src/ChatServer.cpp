@@ -25,14 +25,24 @@ bool ChatServer::onClientConnect(ConnPtr conn) {
 		return false;
 	}
 
-	fmt::println("[{}] accepted", conn->getId());
+	// fmt::println("[{}] accepted", conn->getId());
 
 	return true;
 }
 
 // 客户端断开连接时 调用
 void ChatServer::onClientDisconnect(ConnPtr conn) {
-	fmt::println("[{}] disconnected", conn->getId());
+	// fmt::println("[{}] disconnected", conn->getId());
+	uint32_t uid = conn->getMetaData<uint32_t>("id").value_or(0);
+	std::string m_token = conn->getMetaData<std::string>("token").value_or("");
+
+	// 通知状态服务器 用户登出
+	json data = RPC::userLogout(uid, m_token);
+	if (data["status"] == "ok") {
+		fmt::println("User {} logout", uid);
+	} else {
+		fmt::println("User {} logout failed", uid);
+	}
 }
 
 // 消息到达时 调用
@@ -40,7 +50,7 @@ void ChatServer::onMessage(RcvMsgPtr<MsgID> pMsg) {
 	ConnPtr conn = pMsg->peer;
 	Message<MsgID>& msg = pMsg->msg;
 
-	fmt::println("onMessage:{}", enum_to_string(msg.getId()));
+	// fmt::println("onMessage:{}", enum_to_string(msg.getId()));
 
 	// 服务器处理指定客户端的消息
 	switch (msg.getId()) {
@@ -94,18 +104,19 @@ void ChatServer::checkHeartBeat() {
 					conn->disconnect();
 					++it;
 				} else {
-					onClientDisconnect(conn);
 					it = m_connections.erase(it);
 				}
 			} else {
 				++it;
 			}
 		}
+
 		// 继续检测
 		if (isRunning()) checkHeartBeat();
 	});
 }
 
+// TODO: 可能后续优化参数传递
 void ChatServer::verifyLogin(ConnPtr conn, RcvMsgPtr<MsgID> pMsg) {
 	char* data = pMsg->msg.data();
 	size_t size = pMsg->msg.size();
@@ -122,6 +133,13 @@ void ChatServer::verifyLogin(ConnPtr conn, RcvMsgPtr<MsgID> pMsg) {
 	if (ret["status"] == "ok") {
 		// 登录成功 发送登录成功消息
 		conn->send(msg);
+		uint32_t uid = j["id"].get<uint32_t>();
+		std::string token = j["token"].get<std::string>();
+
+		conn->setMetaData<uint32_t>("id", uid);
+		conn->setMetaData<std::string>("token", token);
+
+		fmt::println("User {} login", uid);
 
 	} else {
 		// 登录失败 发送登录失败消息

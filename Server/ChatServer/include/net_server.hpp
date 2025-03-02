@@ -16,9 +16,16 @@
 // 所有操作都在io_context线程中执行确保证线程安全
 template <class T>
 class server_interface {
+	friend class connection<T>;
+
 	using ConnPtr = std::shared_ptr<connection<T>>;
 
 public:
+	server_interface(const server_interface&) = delete;
+	server_interface(server_interface&&) = delete;
+	server_interface& operator=(const server_interface&) = delete;
+	server_interface& operator=(server_interface&&) = delete;
+
 	server_interface(uint16_t port)
 		: m_acceptor(m_ctx, tcp::endpoint(net::ip::tcp::v4(), port)),
 		  m_signals(m_ctx, SIGINT, SIGTERM) {}
@@ -100,14 +107,15 @@ private:
 						 socket.remote_endpoint().port());
 
 			// socket由connection接管, 所有连接共享 服务器实例的消息队列引用
-			// 从 io_context pool 取出一个 context
-			ConnPtr conn = std::make_shared<connection<T>>(connection<T>::owner::server, m_ctx,
-														   std::move(socket), m_mq_recv);
+			// TODO: 从 io_context pool 取出一个 context
+			ConnPtr conn =
+				std::make_shared<connection<T>>(m_ctx, *this, std::move(socket), m_mq_recv);
 
 			if (onClientConnect(conn)) {
-				// 连接成功，添加到连接队列,服务客户端
+				// 连接成功，添加到连接队列
 				m_connections.insert({conn->getId(), conn});
-				conn->serveClient();
+				// 开始处理消息
+				conn->ayncHandling();
 			}
 
 			// 继续等待下一个客户端连接
@@ -133,10 +141,14 @@ private:
 	}
 
 protected:
-	// 客户端连接时 调用, ret:是否允许客户端连接
+	// 客户端连接时 调用
+	// @return: 是否允许客户端连接
 	virtual bool onClientConnect(ConnPtr conn) = 0;
 
 	// 客户端断开连接时 调用
+	// 1.Socket read/write error
+	// 2.Clinet explcit disconnect request
+	// 3.Socket close
 	virtual void onClientDisconnect(ConnPtr conn) = 0;
 
 	// 消息到达时由 onMessage 处理

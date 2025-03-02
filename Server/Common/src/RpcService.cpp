@@ -2,6 +2,8 @@
 
 #include <grpcpp/client_context.h>
 #include <grpcpp/support/status.h>
+#include "message.grpc.pb.h"
+#include "pool/RpcConnPool.hpp"
 
 json RPC::getEmailVerifyCode(const std::string& email) {
 	// 从邮箱验证服务连接池 取出一个空闲的 Stub
@@ -82,6 +84,31 @@ json RPC::verifyToken(uint32_t id, const std::string& token) {
 	Status status = guard->verifyToken(&context, request, &response);
 	if (!status.ok()) {
 		return RPC::errorResponse(status, "verifyToken", response.message());
+	}
+
+	return {{"status", "ok"}, {"message", response.message()}};
+}
+
+json RPC::userLogout(uint32_t id, const std::string& token) {
+	StubGuard<StatusService> guard(
+		RpcServiceConnPool<StatusService>::getInstance()->getConnection());
+	if (!guard) {
+		return {{"status", "error"}, {"message", "No available connection to status server"}};
+	}
+
+	// 设置超时
+	ClientContext context;
+	context.set_deadline(std::chrono::system_clock::now() + std::chrono::seconds(5));
+
+	// RPC 请求
+	LogoutRequest request;
+	LogoutResponse response;
+	request.set_id(id);
+	request.set_token(token);
+
+	Status status = guard->userLogout(&context, request, &response);
+	if (!status.ok()) {
+		return RPC::errorResponse(status, "userLogout", response.message());
 	}
 
 	return {{"status", "ok"}, {"message", response.message()}};
