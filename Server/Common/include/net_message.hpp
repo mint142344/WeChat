@@ -5,14 +5,14 @@
 #include <algorithm>
 #include <vector>
 
-// 消息头
-template <class T>
+// 消息头, T: 消息 ID 枚举类
+template <class MSG_ID>
 struct message_header {
-	T id{};			   // 用户自定义的枚举类
-	uint32_t size = 0; // only body size
+	MSG_ID id{};
+	uint32_t size = 0; // body size
 };
 
-// 存储要发送的消息; T:枚举类
+// 存储要发送的消息
 template <class T>
 struct message {
 private:
@@ -84,8 +84,6 @@ public:
 
 	void writeBody(const char* data, size_t size) {
 		if (data == nullptr || size == 0) return;
-
-		size_t old_size = m_body.size();
 
 		m_body.insert(m_body.end(), data, data + size);
 

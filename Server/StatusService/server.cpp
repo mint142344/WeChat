@@ -1,12 +1,8 @@
 #include "StatusServer.h"
 
-#include <boost/asio.hpp>
 #include <csignal>
 #include <fmt/base.h>
-#include <fmt/format.h>
-#include <grpcpp/server_builder.h>
 #include <memory>
-#include <string>
 #include <fstream>
 
 using namespace boost;
@@ -34,7 +30,7 @@ int main(int argc, char* argv[]) {
 	asio::signal_set sig_set(ioc, SIGINT, SIGTERM);
 
 	// 2.构建 StatusServer
-	StatusServiceImpl status_server(data);
+	StatusServiceImpl status_server(ioc, data);
 	ServerBuilder builder;
 	builder.AddListeningPort(endpoint, grpc::InsecureServerCredentials());
 	builder.RegisterService(&status_server);

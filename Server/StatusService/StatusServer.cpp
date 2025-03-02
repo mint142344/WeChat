@@ -1,4 +1,5 @@
 #include "StatusServer.h"
+#include "TcpTester.h"
 
 #include <fmt/base.h>
 #include <grpcpp/server_context.h>
@@ -7,17 +8,26 @@
 #include <boost/uuid/uuid.hpp>
 
 #include <chrono>
+#include <memory>
 #include <mutex>
 #include <thread>
 
-StatusServiceImpl::StatusServiceImpl(const json& data) {
+StatusServiceImpl::StatusServiceImpl(net::io_context& ioc, const json& data) : m_ioc(ioc) {
 	// 读取配置文件
 	for (size_t i = 0; i < data["ChatServers"].size(); ++i) {
 		const auto& server = data["ChatServers"][i];
-		m_chat_servers.push_back(
-			{server["host"].get<std::string>(), server["port"].get<uint16_t>(), 0});
+		std::string host = server["host"].get<std::string>();
+		uint16_t port = server["port"].get<uint16_t>();
 
-		// 连接 ChatServer 发送 PING 包，检查是否可以连接
+		// host, port, conn_cnt
+		m_chat_servers.push_back({host, port, 0});
+
+		// 检查是否可以连接
+		bool ok = std::make_shared<TcpTester>(m_ioc)->testConnect(host, port);
+
+		if (!ok) {
+			throw std::runtime_error(fmt::format("Can't connect to ChatServer {}:{}", host, port));
+		}
 
 		// 打印
 		fmt::println("ChatServer{}: {}:{}", i + 1, server["host"].get<std::string>(),

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <boost/asio.hpp>
-
 #include <google/protobuf/stubs/port.h>
 #include <grpcpp/grpcpp.h>
 #include <grpcpp/server_builder.h>
@@ -16,6 +14,7 @@
 
 #include "message.pb.h"
 #include "message.grpc.pb.h"
+#include "net.h"
 
 using json = nlohmann::json;
 
@@ -75,7 +74,7 @@ struct UserInfo {
 // 状态服务器
 class StatusServiceImpl final : public StatusService::Service {
 public:
-	StatusServiceImpl(const json& data);
+	StatusServiceImpl(net::io_context& ioc, const json& data);
 	~StatusServiceImpl() override;
 
 	StatusServiceImpl() = delete;
@@ -103,6 +102,8 @@ private:
 	void cleanJunkUsers();
 
 private:
+	net::io_context& m_ioc;
+
 	// 存储 ChatServer 信息
 	std::list<ChatServerInfo> m_chat_servers;
 

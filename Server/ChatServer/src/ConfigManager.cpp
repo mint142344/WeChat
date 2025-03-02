@@ -6,13 +6,14 @@
 void ConfigManager::load(const std::string& path) {
 	std::ifstream ifs(path);
 	if (!ifs) {
-		throw std::runtime_error("open config file failed");
+		throw std::runtime_error(path + " file not found");
 	}
 
 	m_config = json::parse(ifs);
 	std::string error;
 	if (!checkChatServerConfig(m_config, error)) {
-		throw std::runtime_error(error);
+		throw std::runtime_error(error + "\nPlease refer to the format below\n" +
+								 DEFAULT_CHAT_SERVER_CONFIG.dump(4));
 	}
 }
 
