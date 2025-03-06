@@ -1,5 +1,4 @@
 #include "HttpManager.h"
-#include <qnetworkreply.h>
 
 #include <QJsonObject>
 #include <QJsonDocument>

@@ -7,6 +7,7 @@
 #include <QRegularExpression>
 #include <QMessageBox>
 #include <QJsonObject>
+#include <QFile>
 
 // 密码正则 6-15 位
 const QRegularExpression ForgetDialog::passwordRegex("^[a-zA-Z0-9]{6,15}$");
@@ -46,6 +47,14 @@ void ForgetDialog::initUi() {
 
 	// 设置焦点 输入用户名
 	ui->lineEdit_username->setFocus();
+
+	// set stylesheet
+	QFile file(":/style/LoginRegister.qss");
+	if (file.open(QFile::ReadOnly)) {
+		QString styleSheet = QLatin1String(file.readAll());
+		setStyleSheet(styleSheet);
+		file.close();
+	}
 }
 
 void ForgetDialog::registerAllCallback() {

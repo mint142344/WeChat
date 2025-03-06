@@ -14,8 +14,7 @@
 #include <QAction>
 #include <QJsonObject>
 #include <QMessageBox>
-
-#include <memory>
+#include <QFile>
 
 LoginDialog::LoginDialog(QWidget* parent)
 	: QDialog(parent), ui(new Ui::LoginDialog), m_loading_dialog(new LoadingDialog(this)) {
@@ -123,6 +122,14 @@ void LoginDialog::initUi() {
 	ui->lineEdit_password->setFont(QFont("Microsoft YaHei", 12));
 
 	ui->comboBox_username->setFocus();
+
+	// set stylesheet
+	QFile file(":/style/LoginRegister.qss");
+	if (file.open(QFile::ReadOnly)) {
+		QString styleSheet = QLatin1String(file.readAll());
+		setStyleSheet(styleSheet);
+		file.close();
+	}
 }
 
 void LoginDialog::setShadow() {

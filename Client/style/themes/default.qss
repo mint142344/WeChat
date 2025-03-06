@@ -1,0 +1,106 @@
+/* https://doc.qt.io/qt-6/zh/stylesheet-reference.html */
+
+/* 导航栏 */
+NavigationBar {
+    /*  TODO: 不生效 */
+    background-color: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #1C1D1D, stop:1 #1D1D1E);
+}
+
+NavigationBar QToolButton#btn_avatar {
+    border: none;
+    background-color: transparent;
+}
+
+NavigationBar QToolButton#btn_msg,
+NavigationBar QToolButton#btn_contact,
+NavigationBar QToolButton#btn_robot,
+NavigationBar QToolButton#btn_setting {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background-color: transparent;
+}
+
+NavigationBar QToolButton#btn_msg:hover,
+NavigationBar QToolButton#btn_contact:hover,
+NavigationBar QToolButton#btn_robot:hover {
+    background-color: #494A4A;
+    border-radius: 10px;
+}
+
+NavigationBar QToolButton#btn_msg:checked,
+NavigationBar QToolButton#btn_contact:checked,
+NavigationBar QToolButton#btn_robot:checked {
+    background-color: #494A4A;
+    border-radius: 10px;
+}
+
+NavigationBar QToolButton#btn_setting {
+    margin-left: 11px;
+    border-image: url(:/images/btn_setting.png);
+}
+
+NavigationBar QToolButton#btn_setting:hover {
+    border-image: url(:/images/btn_setting_hover.png);
+}
+
+
+/* 侧边栏 */
+SiderBarWidget {
+    /* TODO:不生效 */
+    background-color: #1B1B1B;
+}
+
+SiderBarWidget QToolButton#btn_add {
+    background-color: #282828;
+}
+SiderBarWidget QToolButton#btn_add:hover {
+    background-color: #393939;
+}
+
+/* 消息列表 会话列表 */
+QListWidget {
+    background-color: #282828;
+}
+
+/* 列表项 */
+QListWidget::item {
+    background-color: #282828;
+}
+
+QListWidget::item:hover {
+    background-color: #393939;
+}
+
+QListWidget::item:selected {
+    background-color: #162A3F;
+}
+
+QListWidget QScrollBar:vertical {
+    width: 8px;
+    background-color: transparent;
+    margin: 0px;
+}
+/* 设置 只有中间的 handle 可见 */
+QListWidget QScrollBar::handle:vertical {
+    background-color: #555555;
+    min-height: 20px;
+    border-radius: 4px;
+}
+
+/* 设置上下翻动按钮 不可见*/
+QListWidget QScrollBar::add-line:vertical, 
+QListWidget QScrollBar::sub-line:vertical {
+    height: 0px;
+    background: none;
+}
+
+/* 除 handle 外的区域 */
+QListWidget QScrollBar::add-page:vertical,
+QListWidget QScrollBar::sub-page:vertical {
+    background: none;
+}
+/* 移除白色虚线边框 */
+QListWidget:focus {
+    outline: none; 
+}

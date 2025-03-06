@@ -2,24 +2,25 @@
 #include "LoginDialog.h"
 
 #include <QApplication>
-#include <QFile>
+
+constexpr bool DEBUG = true;
+
+void setAppStyleSheet(const char* path) {}
 
 int main(int argc, char* argv[]) {
 	QApplication a(argc, argv);
-
-	QFile file(":/style/styleSheet.qss");
-	if (file.open(QFile::ReadOnly)) {
-		QString styleSheet = QLatin1String(file.readAll());
-		a.setStyleSheet(styleSheet);
-		file.close();
-	}
-	a.setWindowIcon(QIcon(":/images/app.ico"));
+	qApp->setWindowIcon(QIcon(":/images/app.ico"));
 
 	MainWindow w;
-	LoginDialog loginDialog;
-	if (loginDialog.exec() == QDialog::Accepted) {
+	if constexpr (DEBUG) {
 		w.show();
-		return a.exec();
+	} else {
+		LoginDialog loginDialog;
+		if (loginDialog.exec() == QDialog::Accepted)
+			w.show();
+		else
+			return 0;
 	}
-	return 0;
+
+	return a.exec();
 }

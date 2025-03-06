@@ -5,6 +5,7 @@
 #include "custom/PasswdLineEdit.h"
 
 #include <QStyle>
+#include <QFile>
 #include <QRegularExpression>
 #include <QRegularExpressionValidator>
 #include <QJsonObject>
@@ -100,6 +101,14 @@ void RegisterDialog::initUi() {
 
 	// 设置焦点 输入用户名
 	ui->lineEdit_username->setFocus();
+
+	// set stylesheet
+	QFile file(":/style/LoginRegister.qss");
+	if (file.open(QFile::ReadOnly)) {
+		QString styleSheet = QLatin1String(file.readAll());
+		setStyleSheet(styleSheet);
+		file.close();
+	}
 }
 
 void RegisterDialog::on_lineEdit_email_editingFinished() {
