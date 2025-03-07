@@ -114,3 +114,29 @@ QListWidget QScrollBar::sub-page:vertical {
 QListWidget:focus {
     outline: none; 
 }
+
+
+/* 联系人 */
+NotifyButton {
+    background-color: #1B1B1B;
+    font-size: 14px;
+    text-align: left;
+    padding: 10px;
+}
+
+NotifyButton:hover,
+QPushButton#btn_friend:hover,
+QPushButton#btn_group:hover {
+    background-color: #2D2D2D;
+}
+
+QPushButton#btn_friend,
+QPushButton#btn_group{
+    font-size: 13px;
+    border-radius: 10px;
+}
+
+QPushButton#btn_friend:checked,
+QPushButton#btn_group:checked {
+    background-color: #2D2D2D;
+}

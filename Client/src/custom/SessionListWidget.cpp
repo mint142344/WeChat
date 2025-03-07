@@ -30,18 +30,18 @@ void SessionListWidget::contextMenuEvent(QContextMenuEvent* event) {
 	m_current_item = itemAt(event->pos());
 
 	if (m_current_item == nullptr) {
-		m_delete_session_act->setEnabled(false);
-		m_rename_session_act->setEnabled(false);
-		m_pin_top_act->setEnabled(false);
+		m_delete_session_act->setVisible(false);
+		m_rename_session_act->setVisible(false);
+		m_pin_top_act->setVisible(false);
 	} else {
 		SessionItem* session = dynamic_cast<SessionItem*>(itemWidget(m_current_item));
 		if (session != nullptr) {
 			m_pin_top_act->setText(session->isPinnedTop() ? "取消置顶" : "置顶会话");
 		}
 
-		m_delete_session_act->setEnabled(true);
-		m_rename_session_act->setEnabled(true);
-		m_pin_top_act->setEnabled(true);
+		m_delete_session_act->setVisible(true);
+		m_rename_session_act->setVisible(true);
+		m_pin_top_act->setVisible(true);
 	}
 
 	// 显示右键菜单

@@ -95,6 +95,7 @@ void SiderBarWidget::initLayout() {
 	m_btn_add->setIcon(QIcon(":/images/btn_add_friend.png"));
 	m_btn_add->setIconSize(QSize(20, 20));
 	m_btn_add->setToolTip("添加好友");
+	m_btn_add->setCursor(Qt::PointingHandCursor);
 
 	search_layout->addWidget(m_search_edit);
 	search_layout->addWidget(m_btn_add);

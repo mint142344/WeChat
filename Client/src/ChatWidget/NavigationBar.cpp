@@ -69,12 +69,14 @@ void NavigationBar::initLayout() {
 		btn->setFixedSize(40, 40);
 		btn->setIconSize(QSize(28, 28));
 		btn->setCheckable(true);
+		btn->setCursor(Qt::PointingHandCursor);
 	}
 
 	// 底部区域
 	m_layout->addStretch(1);
 	m_btn_setting->setObjectName("btn_setting");
 	m_btn_setting->setToolTip("设置");
+	m_btn_setting->setCursor(Qt::PointingHandCursor);
 	m_layout->addWidget(m_btn_setting);
 }
 

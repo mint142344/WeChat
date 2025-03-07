@@ -23,7 +23,7 @@ void MessageItem::setNotDisturb(bool disturb, int cnt) {
 	if (is_disturb) {
 		// 免打扰
 		auto pixmap = QPixmap(":/images/not_disturb.png")
-						  .scaled(20, 20, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+						  .scaled(16, 16, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 		m_label_icon->setPixmap(pixmap);
 		m_label_icon->show();
 
@@ -49,7 +49,7 @@ void MessageItem::setNotDisturb(bool disturb, int cnt) {
 
 MessageItem* MessageItem::clone() {
 	MessageItem* item = new MessageItem;
-	m_label_avatar->setPixmap(m_label_avatar->pixmap());
+	item->setAvatar(m_label_avatar->pixmap());
 	item->setTitle(m_label_title->text());
 	item->setMessage(m_label_message->text());
 	item->m_label_time->setText(m_label_time->text());
