@@ -17,10 +17,10 @@ NavigationBar::NavigationBar(QWidget* parent)
 	  m_btn_setting(new QToolButton{this}) {
 	initLayout();
 	initSignalSlots();
+	m_btn_msg->setChecked(true);
 }
 
 void NavigationBar::initLayout() {
-	setAutoFillBackground(true);
 	// 固定宽度
 	setFixedWidth(60);
 

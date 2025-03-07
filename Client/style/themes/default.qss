@@ -1,7 +1,10 @@
-/* https://doc.qt.io/qt-6/zh/stylesheet-reference.html */
+/* 黑暗主题 */
+QWidget {
+    color: #FFFFFF;
+}
 
 /* 导航栏 */
-NavigationBar {
+NavigationBar#navigationBar {
     /*  TODO: 不生效 */
     background-color: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #1C1D1D, stop:1 #1D1D1E);
 }
@@ -65,11 +68,17 @@ QListWidget {
 
 /* 列表项 */
 QListWidget::item {
-    background-color: #282828;
+    background-color: #1B1B1B;
+}
+
+SessionListWidget::item {
+    margin-top: 3px;
+    margin-bottom: 3px;
+    border-radius: 8px;
 }
 
 QListWidget::item:hover {
-    background-color: #393939;
+    background-color: #2D2D2D;
 }
 
 QListWidget::item:selected {
@@ -98,7 +107,8 @@ QListWidget QScrollBar::sub-line:vertical {
 /* 除 handle 外的区域 */
 QListWidget QScrollBar::add-page:vertical,
 QListWidget QScrollBar::sub-page:vertical {
-    background: none;
+    /* background: none; */
+    background-color: #1B1B1B;
 }
 /* 移除白色虚线边框 */
 QListWidget:focus {

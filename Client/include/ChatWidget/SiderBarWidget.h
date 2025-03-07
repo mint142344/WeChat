@@ -3,6 +3,7 @@
 #include "custom/SearchLineEdit.h"
 #include "custom/MsgListWidget.h"
 #include "custom/SessionListWidget.h"
+#include "custom/ContactWidget.h"
 
 #include <QTreeWidgetItem>
 #include <QVBoxLayout>
@@ -59,6 +60,6 @@ private:
 	// 三种视图
 	ViewType m_view_cur;
 	MsgListWidget* m_view_msg;		 // 消息列表
-	QTreeWidget* m_view_contact;	 // 联系人列表
+	ContactWidget* m_view_contact;	 // 联系人列表
 	SessionListWidget* m_view_robot; // 机器人会话列表
 };

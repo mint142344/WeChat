@@ -1,25 +1,20 @@
 #include "custom/SessionItem.h"
 #include <QHBoxLayout>
+#include <QPalette>
 
 SessionItem::SessionItem(QWidget* parent)
 	: QWidget{parent}, m_label_title{new QLabel{this}}, m_label_time{new QLabel{this}} {
 	initLayout();
 }
 
-void SessionItem::enterEvent(QEnterEvent* event) {
-	QPalette pal = palette();
-	pal.setColor(QPalette::Window, QColor(0x393939));
-	setPalette(pal);
+SessionItem* SessionItem::clone() {
+	SessionItem* item = new SessionItem;
+	item->m_label_title->setText(m_label_title->text());
+	item->m_label_time->setText(m_label_time->text());
+	item->m_uuid = m_uuid;
+	item->m_pin_top = m_pin_top;
 
-	QWidget::enterEvent(event);
-}
-
-void SessionItem::leaveEvent(QEvent* event) {
-	QPalette pal = palette();
-	pal.setColor(QPalette::Window, Qt::transparent);
-	setPalette(pal);
-
-	QWidget::leaveEvent(event);
+	return item;
 }
 
 void SessionItem::initLayout() {
@@ -35,7 +30,8 @@ void SessionItem::initLayout() {
 	m_label_time->setStyleSheet("font-size: 11px; color: #B2B2B2;");
 	m_label_time->setFixedHeight(20);
 
-	main_layout->addWidget(m_label_title);
+	// 确保 时间 最右侧
+	main_layout->addWidget(m_label_title, 1);
 	main_layout->addWidget(m_label_time);
 	setLayout(main_layout);
 }

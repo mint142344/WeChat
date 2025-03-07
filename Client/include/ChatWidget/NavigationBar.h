@@ -1,6 +1,5 @@
 #pragma once
 
-#include <qtmetamacros.h>
 #include <QWidget>
 
 class QVBoxLayout;

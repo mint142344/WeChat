@@ -1,12 +1,14 @@
 #include "custom/MessageItem.h"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QPixmap>
 
 MessageItem::MessageItem(QWidget* parent)
 	: QWidget{parent},
 	  is_read{false},
 	  is_group{false},
 	  is_disturb{false},
+	  is_pin_top{false},
 	  m_label_avatar{new QLabel{this}},
 	  m_label_title{new QLabel{this}},
 	  m_label_message{new QLabel{this}},
@@ -43,6 +45,20 @@ void MessageItem::setNotDisturb(bool disturb, int cnt) {
 				m_label_icon->setText(QString::number(cnt));
 		}
 	}
+}
+
+MessageItem* MessageItem::clone() {
+	MessageItem* item = new MessageItem;
+	m_label_avatar->setPixmap(m_label_avatar->pixmap());
+	item->setTitle(m_label_title->text());
+	item->setMessage(m_label_message->text());
+	item->m_label_time->setText(m_label_time->text());
+	item->setHasRead(is_read);
+	item->setGroup(is_group);
+	item->setNotDisturb(is_disturb);
+	item->setPinTop(is_pin_top);
+
+	return item;
 }
 
 void MessageItem::enterEvent(QEnterEvent* event) {

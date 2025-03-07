@@ -18,14 +18,27 @@ public:
 	void setGroup(bool group) { is_group = group; }
 	bool isGroup() const { return is_group; }
 
+	void setPinTop(bool top) {
+		is_pin_top = top;
+		if (top) {
+			m_label_title->setStyleSheet("font-size: 16px; color: #0066CC;");
+		} else {
+			m_label_title->setStyleSheet("font-size: 16px; color: #FFFFFF;");
+		}
+	}
+	bool isPinTop() const { return is_pin_top; }
+
 	// 设置 未读消息数 or 免打扰
 	void setNotDisturb(bool disturb, int unread_cnt = 0);
 	bool isNotDisturb() const { return is_disturb; }
 
 	void setAvatar(const QPixmap& avatar) { m_label_avatar->setPixmap(Tool::roundImage(avatar)); }
 	void setTitle(const QString& title) { m_label_title->setText(title); }
+	QString getTitle() const { return m_label_title->text(); }
 	void setMessage(const QString& message) { m_label_message->setText(message); }
 	void setTime(const QDateTime& time) { m_label_time->setText(Tool::formatTime(time)); }
+
+	MessageItem* clone();
 
 protected:
 	// 鼠标进入事件
@@ -44,6 +57,8 @@ private:
 	bool is_group;
 	// 是否 免打扰
 	bool is_disturb;
+	// 是否 置顶
+	bool is_pin_top;
 
 	// UI 控件
 	QLabel* m_label_avatar;	 // 头像

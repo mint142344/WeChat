@@ -10,7 +10,7 @@ SiderBarWidget::SiderBarWidget(QWidget* parent)
 	  m_btn_add{new QToolButton{this}},
 	  m_view_cur{ViewType::MessageView},
 	  m_view_msg{new MsgListWidget{this}},
-	  m_view_contact{new QTreeWidget{this}},
+	  m_view_contact{new ContactWidget{this}},
 	  m_view_robot{new SessionListWidget{this}} {
 	initLayout();
 	initSignalSlots();
@@ -23,6 +23,7 @@ SiderBarWidget::SiderBarWidget(QWidget* parent)
 		item1->setMessage("hello world");
 		item1->setTime(QDateTime::currentDateTime());
 		item1->setNotDisturb(true);
+		item1->setGroup(i % 2 == 0);
 
 		m_view_msg->addMessageItem(item1);
 
