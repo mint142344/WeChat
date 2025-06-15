@@ -18,6 +18,12 @@ public:
 	void setGroup(bool group) { is_group = group; }
 	bool isGroup() const { return is_group; }
 
+	void setTimeVisible(bool visible) { m_label_time->setVisible(visible); }
+	bool isTimeVisible() const { return m_label_time->isVisible(); }
+
+	void setNotDisturbVisible(bool visible) { m_label_icon->setVisible(visible); }
+	bool isNotDisturbVisible() const { return m_label_icon->isVisible(); }
+
 	void setPinTop(bool top) {
 		is_pin_top = top;
 		if (top) {
@@ -32,7 +38,7 @@ public:
 	void setNotDisturb(bool disturb, int unread_cnt = 0);
 	bool isNotDisturb() const { return is_disturb; }
 
-	void setAvatar(const QPixmap& avatar) { m_label_avatar->setPixmap(Tool::roundImage(avatar)); }
+	void setAvatar(const QUrl& url);
 	void setTitle(const QString& title) { m_label_title->setText(title); }
 	QString getTitle() const { return m_label_title->text(); }
 	void setMessage(const QString& message) { m_label_message->setText(message); }

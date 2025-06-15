@@ -1,33 +1,51 @@
 #pragma once
 
+#include <QStack>
+#include <QMap>
 #include <QWidget>
+#include <QButtonGroup>
 
-class QHBoxLayout;
-class NavigationBar;
-class SiderBarWidget;
+QT_BEGIN_NAMESPACE
+namespace Ui {
+class MainWindow;
+}
+QT_END_NAMESPACE
 
-// 聊天主窗口
 class MainWindow : public QWidget {
 	Q_OBJECT
 
 public:
 	MainWindow(QWidget* parent = nullptr);
+	~MainWindow();
+
+	void switchTheme(const QString& path);
 
 private:
-	// 初始化控件布局
-	void initLayout();
-	// 初始化槽函数
+	void initUi();
 	void initSignalSlots();
 
 private slots:
-	// TODO: 切换主题
-	void switchTheme(const QString& themePath);
+	void on_btn_avatar_clicked();
+	void on_btn_setting_clicked();
+
+	void on_btn_chat_toggled(bool checked);
+	void on_btn_contact_toggled(bool checked);
+	void on_btn_robot_toggled(bool checked);
+
+	// 添加好友/群
+	void addFriendOrGroup();
+	// 创建群
+	void createGroup();
+
+	// 导航栏按钮组
+	void buttonClicked(int id);
 
 private:
-	// 主布局
-	QHBoxLayout* m_main_layout;
-	// 导航栏
-	NavigationBar* m_navigation_bar;
-	// 侧边栏
-	SiderBarWidget* m_sider_bar;
+	Ui::MainWindow* ui;
+	QButtonGroup* m_btn_group;
+	// 按钮id-isChecked
+	QStack<QMap<int, bool>> m_id_checked;
+
+	// 添加好友/群
+	QMenu* m_add_menu;
 };

@@ -1,27 +1,34 @@
 #pragma once
 
-#include <qaction.h>
 #include <QLineEdit>
-#include <QAction>
-#include <QFocusEvent>
+#include <QKeyEvent>
 
+// 搜索框
 class SearchLineEdit : public QLineEdit {
 	Q_OBJECT
-
 public:
-	explicit SearchLineEdit(QWidget* parent = nullptr);
+	explicit SearchLineEdit(QWidget* parent = nullptr) : QLineEdit(parent) {}
 
-	// 设置搜索图标
-	void setSearchIcon(const QIcon& icon);
-
-	// 设置清除按钮图标
-	void setClearIcon(const QIcon& icon);
+signals:
+	void focusIn();
+	void focusOut();
 
 protected:
-	void focusInEvent(QFocusEvent* event) override;
-	void focusOutEvent(QFocusEvent* event) override;
+	void focusInEvent(QFocusEvent* event) override {
+		QLineEdit::focusInEvent(event);
+		emit focusIn();
+	}
 
-private:
-	QAction* m_search_action{}; // 搜索
-	QAction* m_clear_action{};	// 清除
+	void focusOutEvent(QFocusEvent* event) override {
+		QLineEdit::focusOutEvent(event);
+		emit focusOut();
+	}
+
+	void keyPressEvent(QKeyEvent* event) override {
+		if (event->key() == Qt::Key_Escape) {
+			clearFocus();
+			emit focusOut();
+		}
+		QLineEdit::keyPressEvent(event);
+	}
 };

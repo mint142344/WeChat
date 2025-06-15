@@ -1,7 +1,7 @@
 <RCC>
     <qresource prefix="/">
         <file>style/LoginRegister.qss</file>
-        <file>style/themes/default.qss</file>
+        <file>style/themes/dark.qss</file>
         <file>images/default_avatar.png</file>
         <file>images/app.ico</file>
         <file>images/close.png</file>
@@ -27,5 +27,13 @@
         <file>images/not_disturb.png</file>
         <file>images/collapse.png</file>
         <file>images/expand.png</file>
+        <file>images/btn_emojie.png</file>
+        <file>images/btn_emojie_hover.png</file>
+        <file>images/btn_history.png</file>
+        <file>images/btn_history_hover.png</file>
+        <file>images/btn_open_file.png</file>
+        <file>images/btn_open_file_hover.png</file>
+        <file>images/other.png</file>
+        <file>images/other_hover.png</file>
     </qresource>
 </RCC>

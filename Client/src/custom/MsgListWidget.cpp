@@ -1,5 +1,5 @@
 #include "custom/MsgListWidget.h"
-#include <qaction.h>
+#include <qkeysequence.h>
 #include <QScrollBar>
 #include <QMenu>
 #include <QApplication>
@@ -13,6 +13,21 @@ MsgListWidget::MsgListWidget(QWidget* parent) : QListWidget{parent}, m_ctx_menu{
 	// 去掉 水平滚动条
 	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	verticalScrollBar()->hide();
+
+	for (int i = 0; i < 20; ++i) {
+		MessageItem* item = new MessageItem{this};
+		item->setAvatar(QUrl(":/images/default_avatar.png"));
+		item->setTitle("Title " + QString::number(i));
+		item->setMessage("hello world");
+		item->setTime(QDateTime::currentDateTime());
+		item->setGroup(i % 2 == 0);
+		if (item->isGroup())
+			item->setToolTip("群聊");
+		else
+			item->setToolTip("好友");
+
+		addMessageItem(item);
+	}
 }
 
 void MsgListWidget::addMessageItem(MessageItem* item) {
@@ -49,7 +64,7 @@ void MsgListWidget::contextMenuEvent(QContextMenuEvent* event) {
 }
 
 void MsgListWidget::initMenu() {
-	m_delete_msg_act = m_ctx_menu->addAction("从消息列表中删除");
+	m_delete_msg_act = m_ctx_menu->addAction("从消息列表中删除(&D)", QKeySequence("D"));
 	m_copy_title_act = m_ctx_menu->addAction("复制标题");
 	m_pin_top_act = m_ctx_menu->addAction("置顶");
 	m_quit_group_act = new QAction("退出群聊", this);

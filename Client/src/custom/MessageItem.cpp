@@ -1,7 +1,9 @@
 #include "custom/MessageItem.h"
+#include <qurl.h>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QPixmap>
+#include "Tool.h"
 
 MessageItem::MessageItem(QWidget* parent)
 	: QWidget{parent},
@@ -47,9 +49,17 @@ void MessageItem::setNotDisturb(bool disturb, int cnt) {
 	}
 }
 
+void MessageItem::setAvatar(const QUrl& url) {
+	if (url.path().at(0) == ':') {
+		m_label_avatar->setPixmap(Tool::roundImage(QPixmap(url.path())));
+	} else {
+		// TODO: 加载网络图片
+	}
+}
+
 MessageItem* MessageItem::clone() {
 	MessageItem* item = new MessageItem;
-	item->setAvatar(m_label_avatar->pixmap());
+	item->m_label_avatar->setPixmap(m_label_avatar->pixmap());
 	item->setTitle(m_label_title->text());
 	item->setMessage(m_label_message->text());
 	item->m_label_time->setText(m_label_time->text());

@@ -1,4 +1,5 @@
 #include "custom/SessionListWidget.h"
+#include <qkeysequence.h>
 #include "custom/SessionItem.h"
 
 #include <QScrollBar>
@@ -10,6 +11,13 @@ SessionListWidget::SessionListWidget(QWidget* parent)
 	: QListWidget{parent}, m_ctx_menu{new QMenu(this)} {
 	initUi();
 	initMenu();
+
+	for (int i = 0; i < 10; ++i) {
+		SessionItem* item = new SessionItem{this};
+		item->setTitle("Title " + QString::number(i));
+		item->setTime(QDateTime::currentDateTime());
+		addSessionItem(item);
+	}
 }
 
 void SessionListWidget::addSessionItem(SessionItem* item) {
@@ -60,11 +68,12 @@ void SessionListWidget::initUi() {
 
 void SessionListWidget::initMenu() {
 	setContextMenuPolicy(Qt::DefaultContextMenu);
-	m_new_session_act = m_ctx_menu->addAction("新建会话");
+	m_new_session_act = m_ctx_menu->addAction("新建会话(&N)");
+	m_new_session_act->setShortcut(QKeySequence("N"));
 	m_pin_top_act = m_ctx_menu->addAction("置顶会话");
 	m_ctx_menu->addSeparator();
 	m_rename_session_act = m_ctx_menu->addAction("重命名");
-	m_delete_session_act = m_ctx_menu->addAction("删除会话");
+	m_delete_session_act = m_ctx_menu->addAction("删除会话(&D)", QKeySequence("D"));
 
 	connect(m_new_session_act, &QAction::triggered, this, &SessionListWidget::createNewSession);
 	connect(m_pin_top_act, &QAction::triggered, this, &SessionListWidget::pinTopSession);

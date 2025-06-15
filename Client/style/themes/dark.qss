@@ -1,0 +1,211 @@
+/* 暗色主题 */
+QWidget#MainWindow, QDialog{ 
+    background-color: #1B1B1B;
+}
+QSplitter::handle {
+    background-color: #3d3d3d;
+}
+
+QLabel,QPushButton,QToolButton,QLineEdit,QTextEdit{
+    color: #FFFFFF;
+}
+
+/* 导航栏 */
+QFrame#navigation_bar,QFrame#group_bar {
+    background-color: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #1C1D1D, stop:1 #1D1D1E);
+    border: none;
+}
+
+QToolButton#btn_avatar {
+    border: none;
+    background-color: transparent;
+}
+
+QToolButton#btn_chat,
+QToolButton#btn_contact,
+QToolButton#btn_robot,
+QToolButton#btn_setting {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background-color: transparent;
+}
+
+QToolButton#btn_chat:hover,
+QToolButton#btn_contact:hover,
+QToolButton#btn_robot:hover {
+    background-color: #494A4A;
+    border-radius: 10px;
+}
+
+QToolButton#btn_chat:checked,
+QToolButton#btn_contact:checked,
+QToolButton#btn_robot:checked {
+    background-color: #494A4A;
+    border-radius: 10px;
+}
+
+QToolButton#btn_setting {
+    border-image: url(:/images/btn_setting.png);
+}
+
+QToolButton#btn_setting:hover {
+    border-image: url(:/images/btn_setting_hover.png);
+}
+
+
+/* 侧边栏 */
+QFrame#sider_bar {
+    background-color: #1B1B1B;
+}
+QLineEdit {
+    color: #FFFFFF;
+    border: 1px solid #1B1B1B;
+    background-color: #282828;
+}
+
+/* 侧边栏 */
+QToolButton#btn_add {
+    background-color: #282828;
+}
+QToolButton#btn_add:hover {
+    background-color: #393939;
+}
+QToolButton#btn_add::menu-indicator {
+    image: none;
+}
+
+
+/* 消息列表 会话列表 */
+QListWidget,QTreeWidget {
+    background-color: #282828;
+}
+
+/* 列表项 */
+QListWidget::item, QTreeWidget::item {
+    background-color: #1B1B1B;
+}
+
+#session_list::item {
+    margin-top: 3px;
+    margin-bottom: 3px;
+    border-radius: 8px;
+}
+
+QListWidget::item:hover, QTreeWidget::item:hover {
+    background-color: #2D2D2D;
+}
+
+QListWidget::item:selected, QTreeWidget::item:selected {
+    background-color: #162A3F;
+}
+
+QListWidget QScrollBar:vertical ,QTreeWidget QScrollBar:vertical {
+    width: 8px;
+    background-color: transparent;
+    margin: 0px;
+}
+/* 设置 只有中间的 handle 可见 */
+QListWidget QScrollBar::handle:vertical,
+QTreeWidget QScrollBar::handle:vertical {
+    background-color: #555555;
+    min-height: 20px;
+    border-radius: 4px;
+}
+
+/* 设置上下翻动按钮 不可见*/
+QListWidget QScrollBar::add-line:vertical, 
+QListWidget QScrollBar::sub-line:vertical,
+QTreeWidget QScrollBar::add-line:vertical,
+QTreeWidget QScrollBar::sub-line:vertical {
+    height: 0px;
+    background: none;
+}
+
+/* 除 handle 外的区域 */
+QListWidget QScrollBar::add-page:vertical,
+QListWidget QScrollBar::sub-page:vertical,
+QTreeWidget QScrollBar::add-page:vertical,
+QTreeWidget QScrollBar::sub-page:vertical {
+    /* background: none; */
+    background-color: #1B1B1B;
+}
+/* 移除白色虚线边框 */
+QListWidget:focus,QTreeWidget:focus {
+    outline: none; 
+}
+
+/* 联系人 */
+NotifyButton {
+    background-color: #1B1B1B;
+    font-size: 14px;
+    text-align: left;
+    padding: 10px;
+}
+
+NotifyButton:hover,
+QPushButton#btn_friend:hover,
+QPushButton#btn_group:hover {
+    background-color: #2D2D2D;
+}
+
+QPushButton#btn_friend,
+QPushButton#btn_group{
+    font-size: 13px;
+    border-radius: 10px;
+}
+
+QPushButton#btn_friend:checked,
+QPushButton#btn_group:checked {
+    background-color: #2D2D2D;
+}
+
+
+
+/* 聊天栏 */
+QFrame#chat_bar {
+    background-color: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #2F2A32, stop:1 #121C2D);
+}
+
+QFrame#chat_bar > * {
+    background-color: transparent;
+}
+QWidget#msg_widget,
+QTextEdit#textEdit,
+QFrame#frame_send {
+    border: none;
+    background-color: transparent;
+}
+
+/* 发送按钮 */
+QPushButton#btn_send {
+    background-color: #0066CC;
+}
+QPushButton#btn_send:hover {
+    background-color: #7fbfff;
+}
+
+QToolButton#btn_emojie {
+    border-image: url(:/images/btn_emojie.png);
+}
+QToolButton#btn_emojie:hover {
+    border-image: url(:/images/btn_emojie_hover.png);
+}
+QToolButton#btn_open_file {
+    border-image: url(:/images/btn_open_file.png);
+}
+QToolButton#btn_open_file:hover {
+    border-image: url(:/images/btn_open_file_hover.png);
+}
+QToolButton#btn_toggle_group {
+    border-image: url(:/images/other.png);
+}
+QToolButton#btn_toggle_group:hover {
+    border-image: url(:/images/other_hover.png);
+}
+QToolButton#btn_history {
+    border-image: url(:/images/btn_history.png);
+}
+QToolButton#btn_history:hover {
+    border-image: url(:/images/btn_history_hover.png);
+}
